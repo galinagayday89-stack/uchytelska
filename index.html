@@ -323,6 +323,51 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .p-im img{width:96px;height:72px;object-fit:cover;border-radius:10px;display:block}
 .p-im button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--navy);color:#fff;cursor:pointer;font-size:12px}
 @media (max-width:760px){.pj-cover{grid-template-columns:1fr}.pj-cover img{max-width:360px}.pj-gal.g3{grid-template-columns:1fr}.pstrip{grid-template-columns:1fr}.pstrip img{width:100%;max-width:320px;transform:none}.pj-num{width:62px;height:62px}.pj-num b{font-size:26px}}
+.pq{scroll-margin-top:12px}
+.pq-top{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;margin:6px 0 14px}
+.pq-keys{display:flex;flex-wrap:wrap;gap:6px}
+.pq-keys button{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:#fff;font-family:var(--disp);font-weight:800;color:var(--muted);cursor:pointer;font-size:15px}
+.pq-keys button.got{background:radial-gradient(circle at 35% 30%,#FFE07A,#E0A21C);border-color:#E0A21C;color:var(--navy)}
+.pq-keys button.cur{border-color:var(--blue);color:var(--blue);box-shadow:0 0 0 3px var(--sky2)}
+.pq-keys button.cur.got{color:var(--navy)}
+.pq-stage{background:#fff;border-radius:26px;box-shadow:0 12px 34px rgba(14,28,110,.10);padding:clamp(16px,3vw,32px);min-height:60vh}
+.pq-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border-radius:999px;padding:8px;box-shadow:0 8px 24px rgba(14,28,110,.14);z-index:5}
+.pq-nav span{font-family:var(--disp);font-weight:800;color:var(--navy);text-align:center}
+.pq-nav .btn:disabled{opacity:.35;cursor:default}
+.pq-cover{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,6fr);gap:30px;align-items:center}
+.pq-cover h1{font-size:clamp(32px,5vw,56px);margin:8px 0 10px}
+.pq-cover .pj-intro{margin:6px 0 16px}
+.pj-intro p{margin:0}
+.pq-frame{position:relative;display:grid;place-items:center;background:var(--soft,#F3F6FB);border-radius:18px;min-height:220px;overflow:hidden}
+.pq-frame .spin{position:absolute}
+.pq-frame img{display:block;max-width:100%;max-height:72vh;width:auto;height:auto;object-fit:contain;opacity:0;transition:opacity .35s;cursor:zoom-in;border-radius:14px}
+.pq-frame.ld{background:none;min-height:0}
+.pq-frame.ld .spin{display:none}
+.pq-frame.ld img{opacity:1}
+.pq-frame.cov img{max-height:78vh;box-shadow:0 16px 36px rgba(14,28,110,.18)}
+.pq-head{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.pq-head h2{font-size:clamp(24px,3.4vw,34px)}
+.pq-fig{margin:0 0 20px;display:grid;gap:10px;justify-items:center}
+.pq-fig figcaption{font-size:13px;color:var(--muted)}
+.pq-pics{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pq-pics button{border:3px solid transparent;border-radius:12px;padding:0;background:none;cursor:pointer;overflow:hidden}
+.pq-pics button.on{border-color:#E0A21C}
+.pq-pics img{width:64px;height:84px;object-fit:cover;display:block}
+.pq-page .pj-body{margin:0 auto}
+.pq-lock{max-width:760px;margin:22px auto 0;border:2px dashed #E0A21C;border-radius:18px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#FFFBEF}
+.pq-lock span{display:block;color:var(--muted);margin-top:2px}
+.pq-lock.ok{border-style:solid;background:#EEFBF3;border-color:#3BB273}
+.pq-lock.no{animation:pqShake .4s}
+@keyframes pqShake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.pq-try{display:flex;gap:8px;flex:1;min-width:min(100%,260px);max-width:380px}
+.pq-try .fi{flex:1;min-width:0;text-transform:uppercase;font-weight:800;letter-spacing:.06em}
+.pq-final{text-align:center;display:grid;gap:12px;justify-items:center;padding:20px 0}
+.pq-final h2{font-size:clamp(32px,5vw,52px)}
+.pq-final .pj-auth{text-align:left;min-width:min(100%,420px)}
+.rc .th.pj-th{aspect-ratio:4/5}
+.rc .th.pj-th img{object-fit:cover!important}
+@media (prefers-reduced-motion:reduce){.pq-frame img{transition:none}.pq-lock.no{animation:none}}
+@media (max-width:760px){.pq-cover{grid-template-columns:1fr}.pq-frame img{max-height:60vh}.pq-nav .btn{padding-left:14px;padding-right:14px}.pq-nav span{font-size:14px}}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -1335,31 +1380,75 @@ function viewProjects(){
     <div class="bd">${pr.hidden?HID:""}<h3>${esc(pr.title)}</h3><p>${esc(pr.desc)}</p>
     <div class="mini"><span>${n} ${plural(n,"частина","частини","частин")}</span><span>${a.length} ${plural(a.length,"авторка","авторки","авторок")}</span></div></div></article>`;}).join(""):`<div class="empty">Перший спільний проєкт скоро з'явиться.</div>`}</div>`;
 }
+let PJ = {id:"", page:0, img:0, open:{}};
+const pjNorm = s => String(s||"").toUpperCase().replace(/Ё/g,"Е").replace(/[^0-9A-ZА-ЯІЇЄҐ]/g,"");
 function viewProject(id){
   const pr=(DATA.projects||[]).find(x=>String(x.id)===String(id));
   if(!pr){ app.innerHTML=crumbs(["Спільні проєкти","projects"],["Проєкт"])+`<div class="empty">Проєкт не знайдено.</div>`; return; }
-  const parts=pr.parts||[], A={};
-  parts.forEach((x,i)=>{ const a=String(x.author||"").trim(); if(a) (A[a]=A[a]||[]).push(x.n||i+1); });
-  const word=parts.length&&/ключ/i.test(pr.title)?"Ключ":"Частина";
-  const ans=parts.filter(x=>x.answer||x.password);
+  if(PJ.id!==pr.id) PJ={id:pr.id, page:0, img:0, open:{}};
+  const parts=pr.parts||[], N=parts.length, A={};
+  parts.forEach((x,i)=>{ const a=String(x.author||"").trim(); if(a) (A[a]=A[a]||[]).push(i+1); });
+  const word=/ключ/i.test(pr.title)?"Ключ":"Частина";
+  const authList=`<ul class="pj-auth">${Object.keys(A).map(a=>`<li><b>${esc(a)}</b><span>${A[a].length>1?word==="Ключ"?"ключі":"частини":word==="Ключ"?"ключ":"частина"} ${A[a].join(", ")}</span></li>`).join("")}</ul>`;
   app.innerHTML = crumbs(["Спільні проєкти","projects"],[pr.title]) + (pr.hidden?'<div class="note" style="margin:6px 0 14px">Проєкт схований: так його побачать учасниці, коли ви ввімкнете «Показувати учасницям».</div>':"") + `
-  <section class="pj-cover">
-    ${pr.cover?`<img src="${esc(pr.cover)}" alt="Обкладинка проєкту «${esc(pr.title)}»">`:""}
-    <div class="pj-ctx"><div class="pj-eye">Спільний проєкт спільноти</div><h1>${esc(pr.title)}</h1>${pr.desc?`<p class="pj-lead">${esc(pr.desc)}</p>`:""}
-      <ul class="pj-auth">${Object.keys(A).map(a=>`<li><b>${esc(a)}</b><span>${A[a].length>1?word==="Ключ"?"ключі":"частини":word==="Ключ"?"ключ":"частина"} ${A[a].join(", ")}</span></li>`).join("")}</ul>
-      ${isAdmin()?'<button class="btn ghost sm" id="edp" type="button">✏️ Редагувати проєкт</button>':""}</div>
-  </section>
-  ${pr.intro?`<section class="pj-intro">${pmark(pr.intro)}</section>`:""}
-  ${parts.length>2?`<h2 class="sec">Зміст</h2><div class="pj-toc">${parts.map((x,i)=>`<button type="button" data-pj="${i}"><b>${esc(x.n||i+1)}</b><span>${esc(x.title)}</span></button>`).join("")}</div>`:""}
-  ${parts.map((x,i)=>`<section class="pj-part" id="pj-${i}">
-    <header><div class="pj-num"><span>${word}</span><b>${esc(x.n||i+1)}</b></div><div style="min-width:0"><h2>${esc(x.title)}</h2>${x.author?`<p class="pj-by">Авторка: <b>${esc(x.author)}</b></p>`:""}</div></header>
-    ${(x.imgs||[]).length?`<div class="pj-gal g${Math.min(3,x.imgs.length)}">${x.imgs.map(u=>`<img class="simg" src="${esc(u)}" alt="Ілюстрація: ${esc(x.title)}" loading="lazy">`).join("")}</div>`:""}
-    <div class="pj-body">${pmark(x.text)}</div></section>`).join("")}
-  ${ans.length?`<details class="pj-ans"><summary>Відповіді для вчителя</summary><div class="mtable"><table><thead><tr><th>№</th><th>Відповіді</th><th>Пароль</th></tr></thead><tbody>
-    ${parts.map((x,i)=>x.answer||x.password?`<tr><td>${esc(x.n||i+1)}</td><td class="wrap"><b>${esc(x.title)}</b><br>${esc(x.answer||"")}</td><td><b>${esc(x.password||"")}</b></td></tr>`:"").join("")}</tbody></table></div></details>`:""}`;
-  app.querySelectorAll("[data-pj]").forEach(b=>b.onclick=()=>{ const el=$("#pj-"+b.dataset.pj); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); });
-  app.querySelectorAll(".simg,.pj-cover img").forEach(im=>im.onclick=()=>modal(`<img class="zoom" src="${esc(im.src)}" alt="">`, true));
+  <div class="pq">
+    <div class="pq-top"><div class="pq-keys" id="pqKeys"></div>${isAdmin()?'<button class="btn ghost sm" id="edp" type="button">✏️ Редагувати</button>':""}</div>
+    <div class="pq-stage" id="pqStage"></div>
+    <div class="pq-nav"><button class="btn ghost" type="button" id="pqPrev">‹ Назад</button><span id="pqCount"></span><button class="btn" type="button" id="pqNext">Далі ›</button></div>
+  </div>`;
   if($("#edp")) $("#edp").onclick=()=>{ EDIT_PROJECT=pr.id; ATAB="project"; go("admin"); };
+  const imgBox = (urls, alt) => {
+    if(!urls.length) return "";
+    const k=Math.min(PJ.img, urls.length-1);
+    return `<figure class="pq-fig"><div class="pq-frame"><div class="spin"></div><img src="${esc(urls[k])}" alt="${esc(alt)}"></div>
+      ${urls.length>1?`<div class="pq-pics">${urls.map((u,i)=>`<button type="button" data-im="${i}" class="${i===k?"on":""}" aria-label="Ілюстрація ${i+1}"><img src="${esc(u)}" alt=""></button>`).join("")}</div>`:""}
+      <figcaption>Натисніть на зображення, щоб збільшити</figcaption></figure>`;
+  };
+  const preload = i => { const x=parts[i-1]; if(x) (x.imgs||[]).forEach(u=>{ const im=new Image(); im.src=u; }); };
+  function draw(){
+    const p=PJ.page, st=$("#pqStage");
+    $("#pqKeys").innerHTML=parts.map((x,i)=>`<button type="button" data-pg="${i+1}" class="${p===i+1?"cur":""} ${PJ.open[i]?"got":""}" title="${esc(word+" "+(i+1)+": "+x.title)}">${i+1}</button>`).join("");
+    $("#pqCount").textContent = p===0?"Обкладинка":p>N?"Фінал":`${word} ${p} з ${N}`;
+    $("#pqPrev").disabled = p===0;
+    $("#pqNext").classList.toggle("hidden", p>N);
+    $("#pqNext").textContent = p===0?"Почати ›":p===N?"До фіналу ›":"Далі ›";
+    if(p===0){
+      st.innerHTML=`<section class="pq-cover">${pr.cover?`<div class="pq-frame cov"><div class="spin"></div><img src="${esc(pr.cover)}" alt="Обкладинка «${esc(pr.title)}»"></div>`:""}
+        <div class="pj-ctx"><div class="pj-eye">Спільний проєкт спільноти</div><h1>${esc(pr.title)}</h1>${pr.desc?`<p class="pj-lead">${esc(pr.desc)}</p>`:""}${authList}
+        ${pr.intro?`<div class="pj-intro">${pmark(pr.intro)}</div>`:""}
+        <button class="btn pill gold" type="button" id="pqStart">Розпочати пригоду ›</button></div></section>`;
+      $("#pqStart").onclick=()=>turn(1);
+    } else if(p>N){
+      const ans=parts.map((x,i)=>x.answer||x.password?`<tr><td>${i+1}</td><td class="wrap"><b>${esc(x.title)}</b><br>${esc(x.answer||"")}</td><td><b>${esc(x.password||"")}</b></td></tr>`:"").join("");
+      st.innerHTML=`<section class="pq-final"><div class="pj-eye">${N} ${plural(N,word.toLowerCase(),word==="Ключ"?"ключі":"частини",word==="Ключ"?"ключів":"частин")} пройдено</div><h2>Скриню відкрито!</h2>
+        <p>Дякуємо авторкам, які разом створили цей проєкт:</p>${authList}
+        <button class="btn ghost" type="button" id="pqAgain">↺ Почати спочатку</button></section>
+        ${ans?`<details class="pj-ans"><summary>Відповіді для вчителя</summary><div class="mtable"><table><thead><tr><th>№</th><th>Відповіді</th><th>Пароль</th></tr></thead><tbody>${ans}</tbody></table></div></details>`:""}`;
+      $("#pqAgain").onclick=()=>{ PJ.open={}; turn(0); };
+    } else {
+      const i=p-1, x=parts[i];
+      st.innerHTML=`<section class="pq-page">
+        <header class="pq-head"><div class="pj-num"><span>${word}</span><b>${p}</b></div><div style="min-width:0"><h2>${esc(x.title)}</h2>${x.author?`<p class="pj-by">Авторка: <b>${esc(x.author)}</b></p>`:""}</div></header>
+        ${imgBox(x.imgs||[], x.title)}
+        <div class="pj-body">${pmark(x.text)}</div>
+        ${x.password?`<div class="pq-lock ${PJ.open[i]?"ok":""}" id="pqLock"><div><b>${PJ.open[i]?"🔓 Замок відкрито!":"🔒 Введіть пароль, щоб відкрити замок"}</b>${PJ.open[i]?`<span>Пароль: ${esc(x.password)}. Можна йти далі.</span>`:""}</div>
+          ${PJ.open[i]?"":`<div class="pq-try"><input class="fi" id="pqPw" autocomplete="off" placeholder="Пароль" aria-label="Пароль"><button class="btn gold" type="button" id="pqTry">Відкрити</button></div>`}</div>`:""}
+      </section>`;
+      st.querySelectorAll("[data-im]").forEach(b=>b.onclick=()=>{ PJ.img=+b.dataset.im; draw(); });
+      if($("#pqTry")){ const tryIt=()=>{ const v=pjNorm($("#pqPw").value); if(!v) return;
+          if(v===pjNorm(x.password)){ PJ.open[i]=true; toast(`${word} ${p} знайдено!`); draw(); }
+          else { const l=$("#pqLock"); l.classList.remove("no"); void l.offsetWidth; l.classList.add("no"); toast("Ще не той пароль. Спробуйте ще раз"); } };
+        $("#pqTry").onclick=tryIt; $("#pqPw").onkeydown=e=>{ if(e.key==="Enter") tryIt(); }; }
+      preload(p+1);
+    }
+    st.querySelectorAll(".pq-frame img").forEach(im=>{ const f=im.parentNode; const done=()=>f.classList.add("ld"); if(im.complete&&im.naturalWidth) done(); else { im.onload=done; im.onerror=done; }
+      im.onclick=()=>modal(`<img class="zoom" src="${esc(im.src)}" alt="">`, true); });
+    $("#pqKeys").querySelectorAll("[data-pg]").forEach(b=>b.onclick=()=>turn(+b.dataset.pg));
+  }
+  function turn(n){ PJ.page=Math.max(0,Math.min(N+1,n)); PJ.img=0; draw(); const t=app.querySelector(".pq"); if(t) t.scrollIntoView({behavior:"smooth",block:"start"}); }
+  $("#pqPrev").onclick=()=>turn(PJ.page-1);
+  $("#pqNext").onclick=()=>turn(PJ.page+1);
+  draw(); preload(1);
 }
 
 /* ---------- КАБІНЕТ АВТОРКИ ---------- */
