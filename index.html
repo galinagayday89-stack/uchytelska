@@ -240,6 +240,16 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .adminbar{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;border:2px dashed var(--blue);background:#F5F9FF;border-radius:18px;padding:14px 20px;margin:-8px 0 18px;cursor:pointer;font-family:var(--disp);font-weight:800;color:var(--navy);font-size:17px;text-align:left}
 .adminbar span{color:var(--blue);font-size:15px}
 .editpick{background:var(--sky);border-radius:16px;padding:14px 16px}
+.ocards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.ocard{border:0;background:#fff;border-radius:18px;box-shadow:0 8px 22px rgba(14,28,110,.09);padding:18px 12px;text-align:center;cursor:pointer;font:inherit}
+.ocard b{display:block;font-family:var(--disp);font-size:34px;color:var(--blue);font-variant-numeric:tabular-nums}
+.ocard span{font-weight:700;color:var(--muted);font-size:15px}
+.ocard.warn{background:#FFF6D6}.ocard.warn b{color:#B07A00}
+.mtable{overflow-x:auto;border-radius:16px;box-shadow:0 8px 22px rgba(14,28,110,.09)}
+.mtable table{width:100%;border-collapse:collapse;background:#fff;min-width:560px}
+.mtable th,.mtable td{white-space:nowrap;padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:15px}
+.mtable th{font-family:var(--disp);color:var(--navy);background:var(--sky)}
+.mtable code{font-size:14px;color:var(--navy)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -423,8 +433,15 @@ body{background:var(--paper)}
   .banner.cream .shopimg img{width:100%}
   .banner.cream .tx{grid-template-columns:1fr;text-align:center}
   .banner.cream .tx .btn{grid-column:1;grid-row:auto;justify-self:center;margin-top:8px}
-  .nav button{padding:6px 16px}
+  .nav{gap:4px;flex-wrap:nowrap}
+  .nav button{padding:6px 11px;font-size:15px;white-space:nowrap}
+  .nav .ava{width:40px;height:40px;font-size:17px}
+}
+@media (max-width:370px){
+  .nav{flex-wrap:wrap;justify-content:flex-start}
+  .nav button{padding:5px 9px;font-size:14px}
   .badges{grid-template-columns:repeat(2,1fr)}
+  .ocards{grid-template-columns:repeat(2,1fr)}
   .btn.pill{font-size:17px;padding:10px 24px}
 }
 </style>
@@ -442,6 +459,7 @@ body{background:var(--paper)}
     <nav class="nav hidden" id="nav">
       <button data-go="home">Головна</button>
       <button data-go="journal">Мій журнал</button>
+      <button data-go="admin" id="navAdmin" class="hidden">Кабінет</button>
       <div style="position:relative">
         <button class="ava" id="ava" aria-label="Мій профіль">Г</button>
         <div class="menu hidden" id="menu">
@@ -574,6 +592,8 @@ async function demoApi(action, p){
       lessons:[...DEMO_DATA.lessons, ...(st.lessons||[]).filter(l=>l.show)],
       challenge: st.challenge || DEMO_DATA.challenge, role:"admin"});
     case "adminAddRecipe": (st.recipes=st.recipes||[]).unshift(Object.assign({id:"r"+Date.now(), img:p.photo||"", show:p.show}, p.recipe)); lsSet("cu_demo",st); return {ok:true};
+    case "adminOverview": return {ok:true, questionsWaiting:(st.questions||[]).filter(q=>!q.answer).length+1, worksWaiting:(st.works||[]).filter(w=>!w.approved&&!w.rejected).length+(st.seedW?0:1), recipes:DEMO_DATA.recipes.length+(st.recipes||[]).length, challengeWorks:1,
+      members:[{name:"Галина Гайдай",code:"DEMO",validTo:"",active:true,admin:true,lastLogin:new Date().toISOString().slice(0,10)},{name:"Олена Петренко",code:"UCH-HEBM8",validTo:"2026-12-08",active:true,lastLogin:"2026-11-07"},{name:"Ірина Коваль",code:"UCH-M3HVT",validTo:"2026-11-10",active:true,lastLogin:""},{name:"Наталія Мельник",code:"UCH-TC2AB",validTo:"2026-11-01",active:true,lastLogin:"2026-10-30"}]};
     case "adminRecipes": return {ok:true, items:[...(st.recipes||[]), ...DEMO_DATA.recipes.map(r=>Object.assign({show:true},r))]};
     case "adminUpdateRecipe": { const r=(st.recipes||[]).find(x=>x.id===p.id); if(!r) return {ok:false,message:"Приклади з демо не редагуються — додайте свій рецепт"}; Object.assign(r,p.recipe,{show:p.show}); if(p.photo) r.img=p.photo; lsSet("cu_demo",st); return {ok:true}; }
     case "adminAddLesson": (st.lessons=st.lessons||[]).push(Object.assign({id:"l"+Date.now(), img:"", show:p.show}, p.lesson)); lsSet("cu_demo",st); return {ok:true};
@@ -664,6 +684,7 @@ async function render(){
   $("#sub").textContent="Педагогічна майстерність";
   $("#ava").textContent = firstName(S.name).charAt(0).toUpperCase();
   $("#menuAdmin").classList.toggle("hidden", !isAdmin());
+  $("#navAdmin").classList.toggle("hidden", !isAdmin());
   $("#menuName").textContent = S.name + (S.validTo?` · доступ до ${fmtDate(S.validTo)}`:"");
   const h=ROUTE||"home"; const k=h.indexOf("-"); const route=k<0?h:h.slice(0,k), id=k<0?"":h.slice(k+1);
   document.querySelectorAll(".nav [data-go]").forEach(b=>b.classList.toggle("on", b.dataset.go===route));
@@ -1109,7 +1130,7 @@ function viewJournal(){
 
 /* ---------- КАБІНЕТ АВТОРКИ ---------- */
 const isAdmin = () => !!(S && S.role==="admin");
-let ATAB = "recipe";
+let ATAB = "overview";
 const fld = (id,label,html) => `<div><label class="lbl" for="${id}">${label}</label>${html}</div>`;
 const dl = (id,arr) => `<datalist id="${id}">${[...new Set(arr.filter(Boolean))].map(v=>`<option value="${esc(v)}"></option>`).join("")}</datalist>`;
 async function adminSend(btn, action, payload, okMsg, after){
@@ -1123,7 +1144,7 @@ async function adminSend(btn, action, payload, okMsg, after){
 }
 function viewAdmin(){
   if(!isAdmin()){ viewHome(); return; }
-  const T=[["recipe","Рецепти"],["lesson","Новий урок"],["challenge","Челендж"],["questions","Запитання"],["works","Роботи"],["import","Імпорт"]];
+  const T=[["overview","Огляд"],["recipe","Рецепти"],["lesson","Новий урок"],["challenge","Челендж"],["questions","Запитання"],["works","Роботи"],["import","Імпорт"]];
   app.innerHTML = crumbs(["Головна","home"],["Кабінет авторки"]) + ptitle("Кабінет авторки","Додавайте матеріали й відповідайте учасницям просто з телефона") + `
   <div class="tabs">${T.map(t=>`<button data-a="${t[0]}">${t[1]}</button>`).join("")}</div>
   <div id="abody"></div>`;
@@ -1133,7 +1154,7 @@ function viewAdmin(){
 function drawA(){
   app.querySelectorAll("[data-a]").forEach(b=>b.classList.toggle("on", b.dataset.a===ATAB));
   const box=$("#abody");
-  ({recipe:aRecipe,lesson:aLesson,challenge:aChallenge,questions:aQuestions,works:aWorks,import:aImport})[ATAB](box);
+  ({overview:aOverview,recipe:aRecipe,lesson:aLesson,challenge:aChallenge,questions:aQuestions,works:aWorks,import:aImport})[ATAB](box);
 }
 let EDIT_RECIPE = "";
 async function aRecipe(box){
@@ -1172,6 +1193,27 @@ async function aRecipe(box){
     if(cur) adminSend($("#ar_send"),"adminUpdateRecipe",{id:cur.id,recipe,photo,show:$("#ar_show").checked},"Зміни збережено!",()=>aRecipe(box));
     else adminSend($("#ar_send"),"adminAddRecipe",{recipe,photo,show:$("#ar_show").checked},"Рецепт додано!",()=>aRecipe(box));
   };
+}
+async function aOverview(box){
+  box.innerHTML='<div class="load"><div class="spin"></div></div>';
+  let o; try{ o=await api("adminOverview"); }catch(err){ if(err.message!=="auth") box.innerHTML='<div class="empty">Не вдалося завантажити. Перевірте інтернет.</div>'; return; }
+  if(!o.ok){ box.innerHTML=`<div class="empty">${esc(o.message||"Огляд не завантажився")}. Можливо, потрібно оновити скрипт таблиці.</div>`; return; }
+  const ch=DATA.challenge, m=o.members||[], now=new Date(); now.setHours(0,0,0,0);
+  const st=x=>{ if(!x.active) return ["Вимкнено","b-wait"]; if(!x.validTo) return ["Діє","b-ok"]; const d=new Date(x.validTo+"T00:00:00"), left=Math.round((d-now)/864e5);
+    return left<0?["Закінчився","b-wait"]:left<=3?[`Ще ${left} дн.`,"b-wait"]:["Діє","b-ok"]; };
+  const card=(n,label,tab,warn)=>`<button class="ocard ${warn&&n?"warn":""}" ${tab?`data-a2="${tab}"`:""}><b>${n}</b><span>${label}</span></button>`;
+  box.innerHTML = `<div class="ocards">
+      ${card(o.questionsWaiting,"запитань без відповіді","questions",1)}
+      ${card(o.worksWaiting,"робіт на перевірці","works",1)}
+      ${card(o.recipes,"рецептів у скарбничці","recipe")}
+      ${card(m.filter(x=>st(x)[1]==="b-ok").length+" / "+m.length,"учасниць з діючим доступом","")}
+    </div>
+    <div class="note" style="margin:18px 0">${ch?`Челендж: <b>${esc(ch.desc)}</b>${ch.until?` · до ${esc(fmtDate(ch.until))}`:""} · робіт надіслано: <b>${o.challengeWorks||0}</b>`:"Зараз немає активного челенджу. Запустіть його у вкладці «Челендж»."}</div>
+    <h2 class="sec">Учасниці</h2>
+    ${m.length?`<div class="mtable"><table><thead><tr><th>Імʼя</th><th>Код</th><th>Доступ до</th><th>Статус</th><th>Останній вхід</th></tr></thead><tbody>
+      ${m.map(x=>{const s=st(x); return `<tr><td>${esc(x.name)}${x.admin?' <span class="badge b-type">авторка</span>':""}</td><td><code>${esc(x.code)}</code></td><td>${x.validTo?esc(fmtDate(x.validTo)):"без обмеження"}</td><td><span class="badge ${s[1]}">${s[0]}</span></td><td>${x.lastLogin?esc(fmtDate(x.lastLogin)):"ще не заходила"}</td></tr>`;}).join("")}
+    </tbody></table></div>`:'<div class="empty">Учасниць ще немає. Додайте їх у таблиці, вкладка «Коди».</div>'}`;
+  box.querySelectorAll("[data-a2]").forEach(b=>b.onclick=()=>{ ATAB=b.dataset.a2; drawA(); });
 }
 function aImport(box){
   box.innerHTML = `<div class="form">
