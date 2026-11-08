@@ -159,6 +159,7 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* уроки */
+.simg{display:block;max-width:100%;max-height:460px;width:auto;margin:12px 0 4px;border-radius:14px;box-shadow:0 6px 16px rgba(14,28,110,.12);cursor:zoom-in}
 .sprompt{margin:12px 0 4px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .sprompt .prompt{width:100%;font-size:16px;max-height:320px}
 .lsteps{display:flex;flex-direction:column;gap:14px;counter-reset:s}
@@ -849,8 +850,10 @@ function viewLesson(id){
   <div class="chips" style="margin:-10px 0 20px">${l.platform?`<span class="chip c4">${I.spark}${esc(l.platform)}</span>`:""}
     ${l.video?`<a class="btn sm" href="${esc(l.video)}" target="_blank" rel="noopener">Дивитися відео</a>`:""}</div>
   <div class="lsteps">${(l.steps||[]).map((s,i)=>`<div class="lstep"><div style="min-width:0;flex:1"><h3>${esc(s[0])}</h3><p>${nl(s[1]||"")}</p>
+    ${s[3]?`<img class="simg" src="${esc(s[3])}" alt="Ілюстрація до кроку ${i+1}" loading="lazy">`:""}
     ${s[2]?`<div class="sprompt"><div class="prompt">${esc(s[2])}</div><button class="btn sm" type="button" data-cp="${i}">${I.copy}Копіювати промпт</button></div>`:""}
     <label><input type="checkbox" data-s="${i}" ${done.includes(i)?"checked":""}> Зроблено</label></div></div>`).join("")}</div>`;
+  app.querySelectorAll(".simg").forEach(im=>im.onclick=()=>modal(`<img class="zoom" src="${esc(im.src)}" alt="">`, true));
   app.querySelectorAll("[data-cp]").forEach(b=>b.onclick=async()=>{ const ok=await copyText(l.steps[+b.dataset.cp][2]); toast(ok?"Промпт скопійовано":"Не вдалося скопіювати — виділіть текст вручну"); });
   if(isAdmin()) app.querySelector(".lsteps").insertAdjacentHTML("beforebegin",'<button class="btn ghost sm" id="edl" style="margin-bottom:14px">✏️ Редагувати урок</button>');
   if($("#edl")) $("#edl").onclick=()=>{ EDIT_LESSON=l.id; ATAB="lesson"; go("admin"); };
@@ -1225,37 +1228,42 @@ async function aOverview(box){
 }
 function aImport(box){
   box.innerHTML = `<div class="form">
-    <div class="note">Тут можна додати одразу багато рецептів з файлу, який підготує для вас Claude (файл <b>.json</b>). Рецепти з'являться в скарбничці разом з фото.</div>
-    <div><label class="lbl">Файл з рецептами</label><div class="drop" id="im_drop">Натисніть, щоб обрати файл .json</div><input type="file" id="im_file" accept=".json,application/json" class="hidden"></div>
+    <div class="note">Тут можна додати одразу багато рецептів або уроків з файлу, який підготує для вас Claude (файл <b>.json</b>). Вони з'являться на сайті разом з фото.</div>
+    <div><label class="lbl">Файл для імпорту</label><div class="drop" id="im_drop">Натисніть, щоб обрати файл .json</div><input type="file" id="im_file" accept=".json,application/json" class="hidden"></div>
     <div id="im_list"></div>
   </div>`;
   let items=[];
   $("#im_drop").onclick=()=>$("#im_file").click();
   $("#im_file").onchange=async()=>{
     const f=$("#im_file").files[0]; if(!f) return;
-    try{ const j=JSON.parse(await f.text()); items=(Array.isArray(j)?j:(j.recipes||[])).filter(r=>r&&r.title&&r.prompt); }
+    try{ const j=JSON.parse(await f.text());
+      const rs=(Array.isArray(j)?j:(j.recipes||[])).filter(r=>r&&r.title&&r.prompt).map(r=>Object.assign({kind:"recipe"},r));
+      const ls=(Array.isArray(j)?[]:(j.lessons||[])).filter(l=>l&&l.title&&Array.isArray(l.steps)).map(l=>Object.assign({kind:"lesson",prompt:l.desc||""},l));
+      items=[...ls,...rs]; }
     catch(e){ toast("Не вдалося прочитати файл. Потрібен файл .json від Claude"); return; }
-    if(!items.length){ toast("У файлі немає рецептів"); return; }
-    $("#im_drop").textContent=f.name+" · рецептів: "+items.length+" (натисніть, щоб обрати інший)";
+    if(!items.length){ toast("У файлі немає рецептів чи уроків"); return; }
+    const nr=items.filter(x=>x.kind==="recipe").length, nl2=items.length-nr;
+    $("#im_drop").textContent=f.name+" · "+[nl2?"уроків: "+nl2:"",nr?"рецептів: "+nr:""].filter(Boolean).join(", ")+" (натисніть, щоб обрати інший)";
     $("#im_list").innerHTML=`<label class="chk" style="margin-bottom:10px"><input type="checkbox" id="im_all" checked> Обрати всі</label>
       <div class="qa">${items.map((r,i)=>`<label class="qi chk" style="align-items:flex-start;gap:14px"><input type="checkbox" data-i="${i}" checked style="margin-top:4px">
         ${r.photo?`<img src="${esc(r.photo)}" alt="" style="width:84px;height:84px;object-fit:contain;margin:0;border-radius:10px;background:#F3F6FB;flex:none">`:""}
-        <span style="min-width:0"><b style="font-family:var(--disp);color:var(--navy);font-size:17px">${esc(r.title)}</b><br><span style="font-weight:600;color:var(--muted);font-size:14px">${esc([r.type,r.subject,r.grade,r.platform].filter(Boolean).join(" · "))}</span>
+        <span style="min-width:0"><span class="badge b-type">${r.kind==="lesson"?"Урок · "+r.steps.length+" "+plural(r.steps.length,"крок","кроки","кроків"):"Рецепт"}</span><br><b style="font-family:var(--disp);color:var(--navy);font-size:17px">${esc(r.title)}</b><br><span style="font-weight:600;color:var(--muted);font-size:14px">${esc([r.type,r.subject,r.grade,r.platform].filter(Boolean).join(" · "))}</span>
         <span style="display:block;font-weight:400;font-size:14px;margin-top:4px">${esc(String(r.prompt).slice(0,160))}${String(r.prompt).length>160?"…":""}</span></span></label>`).join("")}</div>
       <label class="chk" style="margin:14px 0"><input type="checkbox" id="im_show" checked> Одразу показати учасницям</label>
-      <button class="btn" type="button" id="im_go">Додати обрані рецепти</button><div id="im_prog" class="note hidden" style="margin-top:12px"></div>`;
+      <button class="btn" type="button" id="im_go">Додати обрані</button><div id="im_prog" class="note hidden" style="margin-top:12px"></div>`;
     $("#im_all").onchange=e=>box.querySelectorAll("[data-i]").forEach(c=>c.checked=e.target.checked);
     $("#im_go").onclick=async()=>{
       const pick=[...box.querySelectorAll("[data-i]:checked")].map(c=>items[+c.dataset.i]);
-      if(!pick.length){ toast("Оберіть хоча б один рецепт"); return; }
+      if(!pick.length){ toast("Оберіть хоча б один пункт"); return; }
       const b=$("#im_go"), pr=$("#im_prog"); b.disabled=true; pr.classList.remove("hidden"); let ok=0, fail=[];
       for(let i=0;i<pick.length;i++){
         const r=pick[i]; pr.textContent=`Додаю ${i+1} з ${pick.length}: ${r.title}…`;
         const recipe={title:r.title,desc:r.desc||"",subject:r.subject||"",grade:r.grade||"",type:r.type||"",platform:r.platform||"",count:r.count||"",prompt:r.prompt,tip:r.tip||""};
-        try{ const res=await api("adminAddRecipe",{recipe,photo:r.photo||"",show:$("#im_show").checked}); if(res.ok) ok++; else fail.push(r.title); }
+        const lesson={title:r.title,desc:r.desc||"",platform:r.platform||"",video:r.video||"",steps:(r.steps||[]).map(s=>Array.isArray(s)?s:[s.title||"",s.text||"",s.prompt||"",s.img||""])};
+        try{ const res=r.kind==="lesson"?await api("adminAddLesson",{lesson,show:$("#im_show").checked}):await api("adminAddRecipe",{recipe,photo:r.photo||"",show:$("#im_show").checked}); if(res.ok) ok++; else fail.push(r.title); }
         catch(e){ if(e.message==="auth") return; fail.push(r.title); }
       }
-      pr.innerHTML=`Готово! Додано рецептів: <b>${ok}</b>.`+(fail.length?`<br>Не вдалося: ${fail.map(esc).join(", ")}. Спробуйте їх ще раз.`:"");
+      pr.innerHTML=`Готово! Додано: <b>${ok}</b>.`+(fail.length?`<br>Не вдалося: ${fail.map(esc).join(", ")}. Спробуйте їх ще раз.`:"");
       b.disabled=false; DATA=null; lsSet("cu_cache_"+S.code,null); await ensureData(); toast("Імпорт завершено");
     };
   };
@@ -1282,8 +1290,11 @@ async function aLesson(box){
   </div>`;
   const add = (st) => { st=st||["","",""]; const n=$("#al_steps").children.length+1; const d=document.createElement("div"); d.className="srow";
     d.innerHTML=`<b>${n}</b><div><input class="fi" placeholder="Назва кроку" maxlength="80"><textarea class="ta s-d" style="min-height:70px;margin-top:8px" placeholder="Що зробити" maxlength="1500"></textarea>
-      <textarea class="ta s-p" style="min-height:60px;margin-top:8px;background:var(--sky)" placeholder="Промпт для цього кроку (необов'язково) — учасниці побачать його з кнопкою «Копіювати»" maxlength="20000"></textarea></div>`;
-    $("#al_steps").appendChild(d); d.querySelector("input").value=st[0]||""; d.querySelector(".s-d").value=st[1]||""; d.querySelector(".s-p").value=st[2]||""; };
+      <textarea class="ta s-p" style="min-height:60px;margin-top:8px;background:var(--sky)" placeholder="Промпт для цього кроку (необов'язково) — учасниці побачать його з кнопкою «Копіювати»" maxlength="20000"></textarea>
+      <div class="drop s-drop" style="margin-top:8px;padding:12px">${st[3]?`<img src="${esc(st[3])}" alt="">Натисніть, щоб замінити скриншот`:"+ Скриншот до кроку (необов'язково)"}</div><input type="file" accept="image/*" class="hidden s-file">
+      ${st[3]?'<label class="chk" style="margin-top:6px;font-size:14px"><input type="checkbox" class="s-del"> Прибрати скриншот</label>':""}</div>`;
+    $("#al_steps").appendChild(d); d.querySelector("input").value=st[0]||""; d.querySelector(".s-d").value=st[1]||""; d.querySelector(".s-p").value=st[2]||"";
+    d.dataset.img=st[3]||""; pickImage(d.querySelector(".s-drop"), d.querySelector(".s-file"), u=>{ d.dataset.img=u; }); };
   if(cur){ $("#al_title").value=cur.title||""; $("#al_desc").value=cur.desc||""; $("#al_platform").value=cur.platform||""; $("#al_video").value=cur.video||""; (cur.steps||[]).forEach(add); }
   else { add(); add(); add(); }
   $("#al_add").onclick = () => add();
@@ -1291,7 +1302,7 @@ async function aLesson(box){
   if($("#al_new")) $("#al_new").onclick = () => { EDIT_LESSON=""; aLesson(box); };
   $("#al_send").onclick = () => {
     const v=id=>$("#"+id).value.trim();
-    const steps=[...box.querySelectorAll(".srow")].map(r=>[r.querySelector("input").value.trim(), r.querySelector(".s-d").value.trim(), r.querySelector(".s-p").value.trim()]).filter(s=>s[0]||s[1]||s[2]);
+    const steps=[...box.querySelectorAll(".srow")].map(r=>[r.querySelector("input").value.trim(), r.querySelector(".s-d").value.trim(), r.querySelector(".s-p").value.trim(), (r.querySelector(".s-del")&&r.querySelector(".s-del").checked)?"":(r.dataset.img||"")]).filter(s=>s[0]||s[1]||s[2]||s[3]);
     const lesson={title:v("al_title"),desc:v("al_desc"),platform:v("al_platform"),video:v("al_video"),steps};
     if(!lesson.title || !steps.length){ toast("Вкажіть назву і хоча б один крок"); return; }
     if(cur) adminSend($("#al_send"),"adminUpdateLesson",{id:cur.id,lesson,show:$("#al_show").checked},"Зміни збережено!",()=>aLesson(box));
