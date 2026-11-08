@@ -368,6 +368,10 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .rc .th.pj-th img{object-fit:cover!important}
 @media (prefers-reduced-motion:reduce){.pq-frame img{transition:none}.pq-lock.no{animation:none}}
 @media (max-width:760px){.pq-cover{grid-template-columns:1fr}.pq-frame img{max-height:60vh}.pq-nav .btn{padding-left:14px;padding-right:14px}.pq-nav span{font-size:14px}}
+.pq-acts{display:flex;gap:8px;flex-wrap:wrap}
+.sh-link{background:var(--sky);border-radius:12px;padding:10px 14px;font-size:14px;word-break:break-all;user-select:all;color:var(--navy);margin-bottom:14px}
+.sh-btns{display:grid;gap:10px}
+.sh-btns .btn{justify-content:center;text-decoration:none}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -1381,6 +1385,25 @@ function viewProjects(){
     <div class="mini"><span>${n} ${plural(n,"частина","частини","частин")}</span><span>${a.length} ${plural(a.length,"авторка","авторки","авторок")}</span></div></div></article>`;}).join(""):`<div class="empty">Перший спільний проєкт скоро з'явиться.</div>`}</div>`;
 }
 let PJ = {id:"", page:0, img:0, open:{}};
+function shareProject(pr){
+  const url = location.origin + location.pathname + "#project-" + pr.id;
+  const au = pAuthors(pr);
+  const text = `🔐 «${pr.title}» — наш спільний проєкт у «Цифровій учительській»!${au.length?"\nАвторки: "+au.join(", ")+".":""}\nВідкривайте й проходьте разом із дітьми 👇`;
+  const tg = "https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(text);
+  const m = modal(`<h2 style="margin-bottom:6px">Поділитися проєктом</h2>
+    <p style="margin:0 0 14px;color:var(--muted)">Посилання відкриє одразу цей проєкт. Учасниці, які ще не входили на сайт, спершу введуть свій код доступу.</p>
+    <div class="sh-link" id="shUrl">${esc(url)}</div>
+    <div class="sh-btns">
+      <a class="btn" href="${esc(tg)}" target="_blank" rel="noopener">✈️ Надіслати в Telegram</a>
+      <button class="btn ghost" type="button" id="shCopy">${I.copy}Копіювати посилання</button>
+      <button class="btn ghost" type="button" id="shText">Копіювати текст допису</button>
+      ${navigator.share?'<button class="btn ghost" type="button" id="shMore">Інші способи…</button>':""}
+    </div>
+    <button class="btn ghost sm" type="button" data-close style="margin-top:14px">Закрити</button>`);
+  m.querySelector("#shCopy").onclick=async()=>{ const ok=await copyText(url); toast(ok?"Посилання скопійовано":"Виділіть посилання вручну"); };
+  m.querySelector("#shText").onclick=async()=>{ const ok=await copyText(text+"\n"+url); toast(ok?"Текст із посиланням скопійовано":"Не вдалося скопіювати"); };
+  const more=m.querySelector("#shMore"); if(more) more.onclick=()=>navigator.share({title:pr.title,text,url}).catch(()=>{});
+}
 const pjNorm = s => String(s||"").toUpperCase().replace(/Ё/g,"Е").replace(/[^0-9A-ZА-ЯІЇЄҐ]/g,"");
 function viewProject(id){
   const pr=(DATA.projects||[]).find(x=>String(x.id)===String(id));
@@ -1392,11 +1415,12 @@ function viewProject(id){
   const authList=`<ul class="pj-auth">${Object.keys(A).map(a=>`<li><b>${esc(a)}</b><span>${A[a].length>1?word==="Ключ"?"ключі":"частини":word==="Ключ"?"ключ":"частина"} ${A[a].join(", ")}</span></li>`).join("")}</ul>`;
   app.innerHTML = crumbs(["Спільні проєкти","projects"],[pr.title]) + (pr.hidden?'<div class="note" style="margin:6px 0 14px">Проєкт схований: так його побачать учасниці, коли ви ввімкнете «Показувати учасницям».</div>':"") + `
   <div class="pq">
-    <div class="pq-top"><div class="pq-keys" id="pqKeys"></div>${isAdmin()?'<button class="btn ghost sm" id="edp" type="button">✏️ Редагувати</button>':""}</div>
+    <div class="pq-top"><div class="pq-keys" id="pqKeys"></div><div class="pq-acts"><button class="btn gold sm" id="shp" type="button">📤 Поділитися</button>${isAdmin()?'<button class="btn ghost sm" id="edp" type="button">✏️ Редагувати</button>':""}</div></div>
     <div class="pq-stage" id="pqStage"></div>
     <div class="pq-nav"><button class="btn ghost" type="button" id="pqPrev">‹ Назад</button><span id="pqCount"></span><button class="btn" type="button" id="pqNext">Далі ›</button></div>
   </div>`;
   if($("#edp")) $("#edp").onclick=()=>{ EDIT_PROJECT=pr.id; ATAB="project"; go("admin"); };
+  $("#shp").onclick=()=>shareProject(pr);
   const imgBox = (urls, alt) => {
     if(!urls.length) return "";
     const k=Math.min(PJ.img, urls.length-1);
