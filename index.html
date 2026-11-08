@@ -378,6 +378,8 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .totop:hover{background:var(--blue-d)}
 .totop:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.totop{transition:none}}
+.rc .th.lth{background:#F3F6FB}
+.rc .th.lth img{object-fit:cover;object-position:center top}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -728,10 +730,10 @@ async function demoApi(action, p){
       members:[{name:"Галина Гайдай",code:"DEMO",validTo:"",active:true,admin:true,lastLogin:new Date().toISOString().slice(0,10)},{name:"Олена Петренко",code:"UCH-HEBM8",validTo:"2026-12-08",active:true,lastLogin:"2026-11-07"},{name:"Ірина Коваль",code:"UCH-M3HVT",validTo:"2026-11-10",active:true,lastLogin:""},{name:"Наталія Мельник",code:"UCH-TC2AB",validTo:"2026-11-01",active:true,lastLogin:"2026-10-30"}]};
     case "adminDelete": { const k=p.kind==="lesson"?"lessons":p.kind==="project"?"projects":"recipes"; st[k]=(st[k]||[]).filter(x=>x.id!==p.id); lsSet("cu_demo",st); return {ok:true}; }
     case "adminLessons": return {ok:true, items:[...DEMO_DATA.lessons.map(l=>Object.assign({show:true},l)), ...(st.lessons||[])]};
-    case "adminUpdateLesson": { const l=(st.lessons||[]).find(x=>x.id===p.id); if(!l) return {ok:false,message:"Приклади з демо не редагуються — додайте свій урок"}; Object.assign(l,p.lesson,{show:p.show}); lsSet("cu_demo",st); return {ok:true}; }
+    case "adminUpdateLesson": { const l=(st.lessons||[]).find(x=>x.id===p.id); if(!l) return {ok:false,message:"Приклади з демо не редагуються — додайте свій урок"}; const im0=l.img; Object.assign(l,p.lesson,{show:p.show}); l.img=p.lesson.cover||im0; lsSet("cu_demo",st); return {ok:true}; }
     case "adminRecipes": return {ok:true, items:[...(st.recipes||[]), ...DEMO_DATA.recipes.map(r=>Object.assign({show:true},r))]};
     case "adminUpdateRecipe": { const r=(st.recipes||[]).find(x=>x.id===p.id); if(!r) return {ok:false,message:"Приклади з демо не редагуються — додайте свій рецепт"}; Object.assign(r,p.recipe,{show:p.show}); if(p.photo) r.img=p.photo; lsSet("cu_demo",st); return {ok:true}; }
-    case "adminAddLesson": (st.lessons=st.lessons||[]).push(Object.assign({id:"l"+Date.now(), img:"", show:p.show}, p.lesson)); lsSet("cu_demo",st); return {ok:true};
+    case "adminAddLesson": (st.lessons=st.lessons||[]).push(Object.assign({id:"l"+Date.now(), img:p.lesson.cover||"", show:p.show}, p.lesson)); lsSet("cu_demo",st); return {ok:true};
     case "adminSetChallenge": st.challenge=Object.assign({id:"c"+Date.now()}, p.challenge); lsSet("cu_demo",st); return {ok:true};
     case "adminQuestions": { st.seedQ = st.seedQ || {answer:"",public:false};
       return {ok:true, items:[...st.questions.map((q,i)=>Object.assign({row:"m"+i, name:"Галина (демо)", public:!!q.public}, q)),
@@ -990,7 +992,8 @@ function viewLessons(){
   app.innerHTML = crumbs(["Головна","home"],["Уроки з практикою"]) + ptitle("Уроки з практикою","Вчимося разом: кроки, готові промпти й практичне завдання") + `
   <div class="grid3">${L.length?L.map((l,i)=>{
     const done = (p.lessons[l.id]||[]).length, all=(l.steps||[]).length;
-    return `<article class="rc" data-go="lesson-${esc(l.id)}"><div class="th">${l.img?thumb(l.img,l.title):`<img src="${IMG.pencils}" alt="" style="object-fit:contain;padding:14px">`}</div>
+    const cov = l.img || ((l.steps||[]).find(s=>s&&s[3])||[])[3] || "";
+    return `<article class="rc" data-go="lesson-${esc(l.id)}"><div class="th ${cov?"lth":""}">${cov?thumb(cov,l.title):`<img src="${IMG.pencils}" alt="" style="object-fit:contain;padding:14px">`}</div>
     <div class="bd">${l.hidden?HID:""}<h3>${esc(l.title)}</h3><p>${esc(l.desc)}</p><div class="mini"><span>${esc(l.platform||"")}</span><span>${all} ${plural(all,"крок","кроки","кроків")}</span>${done?`<span>пройдено ${done}/${all}</span>`:""}</div></div></article>`;}).join(""):`<div class="empty">Уроки скоро з'являться.</div>`}</div>`;
 }
 function viewLesson(id){
@@ -1614,7 +1617,7 @@ function aImport(box){
       for(let i=0;i<pick.length;i++){
         const r=pick[i]; pr.textContent=`Додаю ${i+1} з ${pick.length}: ${r.title}…`;
         const recipe={title:r.title,desc:r.desc||"",subject:r.subject||"",grade:r.grade||"",type:r.type||"",platform:r.platform||"",count:r.count||"",prompt:r.prompt,tip:r.tip||""};
-        const lesson={title:r.title,desc:r.desc||"",platform:r.platform||"",video:r.video||"",steps:(r.steps||[]).map(s=>Array.isArray(s)?s:[s.title||"",s.text||"",s.prompt||"",s.img||""])};
+        const lesson={title:r.title,desc:r.desc||"",platform:r.platform||"",video:r.video||"",cover:r.cover||"",steps:(r.steps||[]).map(s=>Array.isArray(s)?s:[s.title||"",s.text||"",s.prompt||"",s.img||""])};
         const project={title:r.title,desc:r.desc||"",intro:r.intro||"",cover:r.cover||"",parts:r.parts||[]};
         if(r.kind==="project") pr.textContent=`Додаю «${r.title}» з ілюстраціями… Це може зайняти до хвилини, не закривайте сторінку.`;
         try{ const res=r.kind==="project"?await api("adminAddProject",{project,show:$("#im_show").checked}):r.kind==="lesson"?await api("adminAddLesson",{lesson,show:$("#im_show").checked}):await api("adminAddRecipe",{recipe,photo:r.photo||"",show:$("#im_show").checked}); if(res.ok) ok++; else fail.push(r.title); }
@@ -1699,6 +1702,8 @@ async function aLesson(box){
       ${fld("al_platform","Платформа",'<input class="fi" id="al_platform" list="dl_lp" maxlength="40">'+dl("dl_lp",["ChatGPT","Gemini","Claude","Canva","Wordwall","LearningApps","Google Форми","Будь-яка"]))}
       ${fld("al_video","Посилання на відео",'<input class="fi" id="al_video" inputmode="url" placeholder="https://…">')}
     </div>
+    <div><label class="lbl">Обкладинка уроку</label><div class="drop" id="al_drop">${cur&&cur.img?`<img src="${esc(cur.img)}" alt="Поточна обкладинка">Натисніть, щоб замінити`:"Натисніть, щоб обрати картинку для картки уроку (необов'язково)"}</div><input type="file" id="al_file" accept="image/*" class="hidden">
+      <div class="note" style="margin-top:8px;font-size:14px">Якщо обкладинки немає, на картці покажеться перший скриншот з кроків.</div></div>
     <div><label class="lbl">Кроки *</label><div id="al_steps" class="srows"></div>
       <button type="button" class="btn ghost sm" id="al_add" style="margin-top:10px">+ Додати крок</button></div>
     <label class="chk"><input type="checkbox" id="al_show" ${!cur||cur.show?"checked":""}> ${cur?"Показувати учасницям":"Одразу показати учасницям"}</label>
@@ -1714,6 +1719,7 @@ async function aLesson(box){
     const cpb=d.querySelector(".s-cp"), pta=d.querySelector(".s-p"); const upd=()=>cpb.classList.toggle("hidden",!pta.value.trim()); upd(); pta.oninput=upd;
     cpb.onclick=async()=>{ const ok=await copyText(pta.value); toast(ok?"Промпт скопійовано":"Не вдалося скопіювати"); };
     d.dataset.img=st[3]||""; pickImage(d.querySelector(".s-drop"), d.querySelector(".s-file"), u=>{ d.dataset.img=u; }); };
+  let lcover=""; pickImage($("#al_drop"), $("#al_file"), u=>lcover=u);
   if(cur){ $("#al_title").value=cur.title||""; $("#al_desc").value=cur.desc||""; $("#al_platform").value=cur.platform||""; $("#al_video").value=cur.video||""; (cur.steps||[]).forEach(add); }
   else { add(); add(); add(); }
   $("#al_add").onclick = () => add();
@@ -1727,6 +1733,7 @@ async function aLesson(box){
     const steps=[...box.querySelectorAll(".srow")].map(r=>[r.querySelector("input").value.trim(), r.querySelector(".s-d").value.trim(), r.querySelector(".s-p").value.trim(), (r.querySelector(".s-del")&&r.querySelector(".s-del").checked)?"":(r.dataset.img||"")]).filter(s=>s[0]||s[1]||s[2]||s[3]);
     const lesson={title:v("al_title"),desc:v("al_desc"),platform:v("al_platform"),video:v("al_video"),steps};
     if(!lesson.title || !steps.length){ toast("Вкажіть назву і хоча б один крок"); return; }
+    lesson.cover=lcover;
     if(cur) adminSend($("#al_send"),"adminUpdateLesson",{id:cur.id,lesson,show:$("#al_show").checked},"Зміни збережено!",()=>aLesson(box));
     else adminSend($("#al_send"),"adminAddLesson",{lesson,show:$("#al_show").checked},"Урок додано!",()=>aLesson(box));
   };
