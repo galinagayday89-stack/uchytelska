@@ -118,8 +118,8 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 
 /* рецепт */
 .rgrid{display:grid;grid-template-columns:1.12fr 1fr;gap:24px;align-items:start}
-.rimg{border-radius:16px;overflow:hidden;background:var(--soft);aspect-ratio:12/5;display:grid;place-items:center}
-.rimg img{width:100%;height:100%;object-fit:cover}
+.rimg{border-radius:16px;overflow:hidden;background:var(--soft);display:grid;place-items:center;min-height:160px}
+.rimg img{width:100%;height:auto;max-height:75vh;object-fit:contain;cursor:zoom-in}
 .chips{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
 .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;font-weight:700;font-size:16px;color:var(--ink)}
 .chip svg{width:22px;height:22px}
@@ -127,7 +127,7 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .chip.c2{background:#E2F6EE}.chip.c2 svg{color:#22A05E}
 .chip.c3{background:#FFF3D3}.chip.c3 svg{color:#E3A500}
 .chip.c4{background:#FDE8E4}.chip.c4 svg{color:var(--coral)}
-.prompt{background:var(--sky);border-radius:16px;padding:22px 24px;font-family:var(--disp);font-weight:700;font-size:clamp(17px,1.7vw,22px);line-height:1.45;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.prompt{background:var(--sky);border-radius:16px;padding:22px 24px;font-family:var(--disp);font-weight:700;font-size:clamp(17px,1.7vw,22px);line-height:1.45;color:var(--ink);white-space:pre-wrap;word-break:break-word;max-height:440px;overflow:auto}
 .pbtns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
 .pbtns .btn{font-size:clamp(16px,1.6vw,21px);padding:14px 12px}
 .tip{display:flex;align-items:center;gap:12px;margin-top:18px;font-style:italic;font-size:18px}
@@ -219,16 +219,17 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .qi .qt{font-weight:700;white-space:pre-wrap}
 .qi .ans{margin-top:12px;background:var(--sky);border-radius:14px;padding:14px 16px;white-space:pre-wrap}
 .qi .ans b{display:block;font-family:var(--disp);color:var(--navy);margin-bottom:4px}
-.qi img{max-height:200px;border-radius:10px;margin-top:10px}
-.chal{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;background:#E3F5FE;border-radius:var(--r);padding:24px 28px;margin-bottom:24px;position:relative;overflow:hidden}
-.chal img{width:150px}
-.chal .tx{border-left:5px solid var(--yellow);padding-left:16px;position:relative;z-index:1}
+.qi img{max-height:320px;max-width:100%;border-radius:10px;margin-top:10px;cursor:zoom-in}
+.chal{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;background:linear-gradient(110deg,#DCEBFF 0%,#EEF6FF 55%,#E3F0FF 100%);border-radius:26px;padding:18px 28px 18px 18px;margin-bottom:24px;box-shadow:0 10px 28px rgba(14,28,110,.10)}
+.chal img{width:170px;filter:drop-shadow(0 8px 10px rgba(14,28,110,.15))}
+.chal .tx{position:relative;z-index:1}
 .chal h2{font-size:clamp(22px,2.6vw,32px)}
 .chal p{margin:6px 0 14px}
 .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
 .gi{background:#fff;border:1px solid #E9ECF4;border-radius:18px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
 .gi .th{aspect-ratio:4/3;background:var(--soft);cursor:zoom-in}
-.gi .th img{width:100%;height:100%;object-fit:cover}
+.gi .th{background:#F3F6FB}
+.gi .th img{width:100%;height:100%;object-fit:contain}
 .gi .bd{padding:14px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
 .gi h3{font-size:17px}
 .gi p{margin:0;font-size:14px;color:var(--muted)}
@@ -258,11 +259,13 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .stat b{display:block;font-family:var(--disp);font-weight:800;font-size:34px;color:var(--blue)}
 .stat span{font-weight:700;color:var(--muted);font-size:15px}
 .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:28px}
-.bdg{border-radius:18px;padding:16px 12px;text-align:center;border:2px solid var(--line);background:#fff}
+.badges{grid-template-columns:repeat(4,1fr)}
+.bdg{border-radius:18px;padding:16px 12px;text-align:center;border:0;background:#fff;box-shadow:0 8px 22px rgba(14,28,110,.09)}
+.bdg img{width:86px;height:76px;object-fit:contain;margin:0 auto 8px;filter:drop-shadow(0 5px 8px rgba(14,28,110,.15))}
 .bdg .ico{width:62px;height:62px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:24px;color:#fff}
 .bdg b{display:block;font-family:var(--disp);color:var(--navy);font-size:15px}
 .bdg span{font-size:13px;color:var(--muted)}
-.bdg.off{opacity:.45;filter:grayscale(1)}
+.bdg.off{opacity:.5;filter:grayscale(1)}
 h2.sec{font-size:24px;margin:8px 0 14px}
 
 /* перший день */
@@ -317,7 +320,8 @@ h2.sec{font-size:24px;margin:8px 0 14px}
   .types{grid-template-columns:1fr}
   .how{grid-template-columns:1fr}
   .chal{grid-template-columns:1fr}
-  .chal img{display:none}
+  .chal img{display:block;width:140px;margin:0 auto}
+  .chal .tx{text-align:center}
   .jtop{grid-template-columns:auto 1fr}
   .jtop .btn{grid-column:1/-1}
   .steps3 .bar{display:none}
@@ -329,6 +333,8 @@ h2.sec{font-size:24px;margin:8px 0 14px}
 }
 
 /* ===== РЕАЛІСТИЧНИЙ СТИЛЬ ===== */
+.grid3 .rc .th{background:#F3F6FB}
+.grid3 .rc .th img{object-fit:contain}
 .banner.cream{flex-direction:column;align-items:stretch;padding:14px 14px 18px;gap:12px}
 .banner.cream .shopimg{order:-1;display:block;border-radius:18px;overflow:hidden;box-shadow:0 6px 16px rgba(14,28,110,.12)}
 .banner.cream .shopimg img{order:0;width:100%;height:auto;filter:none;display:block}
@@ -366,8 +372,8 @@ body{background:var(--paper)}
 .hello p b{color:var(--navy)}
 .tile{border:0;border-radius:24px;box-shadow:0 10px 28px rgba(14,28,110,.10),0 2px 6px rgba(14,28,110,.05);padding:0 18px 0 0;gap:6px;min-height:190px;background:linear-gradient(180deg,#fff,#FAFCFF)}
 .tile::after{display:none}
-.tile img{width:48%;max-width:none;align-self:stretch;object-fit:contain;object-position:left bottom;padding:12px 0 8px 10px;filter:drop-shadow(0 8px 10px rgba(14,28,110,.15))}
-.tile span{min-width:0;font-size:clamp(18px,1.6vw,27px);font-weight:700;text-align:center;flex:1;line-height:1.05}
+.tile img{width:45%;max-width:none;align-self:stretch;object-fit:contain;object-position:left bottom;padding:12px 0 8px 10px;filter:drop-shadow(0 8px 10px rgba(14,28,110,.15))}
+.tile span{min-width:0;font-size:clamp(17px,1.5vw,26px);font-weight:700;text-align:center;flex:1;line-height:1.05}
 .tile span::after{width:96px;height:12px;margin:10px auto 0;background:var(--swY) no-repeat center/contain;border-radius:0}
 .tile.u-t span::after{background-image:var(--swT)}
 .tile:hover img{transform:translateY(-3px) scale(1.03);transition:transform .25s}
@@ -418,6 +424,8 @@ body{background:var(--paper)}
   .banner.cream .tx{grid-template-columns:1fr;text-align:center}
   .banner.cream .tx .btn{grid-column:1;grid-row:auto;justify-self:center;margin-top:8px}
   .nav button{padding:6px 16px}
+  .badges{grid-template-columns:repeat(2,1fr)}
+  .btn.pill{font-size:17px;padding:10px 24px}
 }
 </style>
 </head>
@@ -626,7 +634,7 @@ function viewLogin(){
     const b=$("#lbtn"); b.disabled=true; b.textContent="Перевіряю…"; $("#lerr").textContent="";
     try{
       const r = await api("login",{code});
-      if(r.ok){ S={code:code.toUpperCase(), name:r.name, validTo:r.validTo, role:r.role||"member"}; lsSet("cu_session",S); go("home"); }
+      if(r.ok){ S={code:code.toUpperCase(), name:r.name, validTo:r.validTo, role:r.role||"member"}; lsSet("cu_session",S); go(START_ROUTE==="admin"?"home":START_ROUTE); }
       else $("#lerr").textContent = r.message || "Код не підійшов.";
     }catch(err){ $("#lerr").textContent="Немає зв'язку. Перевірте інтернет і спробуйте ще раз."; }
     b.disabled=false; b.textContent="Увійти";
@@ -641,6 +649,7 @@ async function ensureData(){
     if(r.ok){ DATA = {recipes:r.recipes||[], lessons:r.lessons||[], challenge:r.challenge||null}; lsSet("cu_cache_"+S.code, DATA); if(r.name){S.name=r.name; S.validTo=r.validTo; S.role=r.role||S.role; lsSet("cu_session",S);} }
   }catch(e){ if(e.message==="auth") throw e; }
   if(!DATA) DATA={recipes:[],lessons:[],challenge:null};
+  if(DATA.challenge && DATA.challenge.until){ const u=new Date(DATA.challenge.until+"T23:59:59"); if(!isNaN(u) && u<new Date()) DATA.challenge=null; }
   return DATA;
 }
 
@@ -665,7 +674,7 @@ async function render(){
              trainers:viewTrainers,trainer:viewTrainer,questions:viewQuestions,board:viewBoard,journal:viewJournal};
   (V[route]||viewHome)(id);
 }
-let ROUTE = (location.hash.slice(1)||"home"); if(!/^[a-z]+(-[\w-]+)?$/.test(ROUTE)) ROUTE="home";
+let ROUTE = (location.hash.slice(1)||"home"); if(!/^[a-z]+(-[\w-]+)?$/.test(ROUTE)) ROUTE="home"; const START_ROUTE = ROUTE;
 const FRAMED = (()=>{ try{ return window.top!==window; }catch(e){ return true; } })();
 function go(r){ ROUTE=r; if(!FRAMED){ try{ if(location.hash.slice(1)!==r) location.hash="#"+r; }catch(e){} } render(); }
 if(!FRAMED) window.addEventListener("hashchange", ()=>{ const h=location.hash.slice(1)||"home"; if(h!==ROUTE){ ROUTE=h; render(); } });
@@ -673,6 +682,7 @@ document.addEventListener("click", e=>{
   const g = e.target.closest("[data-go]");
   if(g){ e.preventDefault(); go(g.dataset.go); }
 });
+document.addEventListener("click", e=>{ const im=e.target.closest(".qi img"); if(im) modal(`<img class="zoom" src="${esc(im.src)}" alt="">`, true); });
 $("#brand").onclick = () => { if(S) go("home"); };
 $("#ava").onclick = e => { e.stopPropagation(); $("#menu").classList.toggle("hidden"); };
 function closeMenu(){ $("#menu").classList.add("hidden"); const b=$("#logout"); delete b.dataset.sure; b.textContent="Вийти"; }
@@ -763,7 +773,7 @@ function viewRecipe(id){
   const r = DATA.recipes.find(x=>String(x.id)===String(id));
   if(!r){ app.innerHTML = crumbs(["Головна","home"],["Методична скарбничка","recipes"],["Рецепт"])+`<div class="empty">Рецепт не знайдено.</div>`; return; }
   const p = P(); const fav = p.fav.includes(r.id);
-  app.innerHTML = crumbs(["Методична скарбничка","recipes"],["Рецепт матеріалу"]) + ptitle("Рецепт: "+r.title.charAt(0).toLowerCase()+r.title.slice(1), r.desc) + `
+  app.innerHTML = crumbs(["Методична скарбничка","recipes"],["Рецепт матеріалу"]) + ptitle("Рецепт: "+(/^.[а-яіїєґa-z’']/.test(r.title)?r.title.charAt(0).toLowerCase()+r.title.slice(1):r.title), r.desc) + `
   <div class="rgrid">
     <div class="card">
       <div class="chead"><div class="ic">${I.image}</div><h2>Результат</h2></div>
@@ -787,6 +797,7 @@ function viewRecipe(id){
     </div>
   </div>
   <div class="steps3"><div><i>1.</i>Оберіть тему</div><span class="bar"></span><div><i>2.</i>Скопіюйте промпт</div><span class="bar"></span><div><i>3.</i>Створіть матеріал</div></div>`;
+  const ri=app.querySelector(".rimg img"); if(ri) ri.onclick=()=>modal(`<img class="zoom" src="${esc(ri.src)}" alt="">`, true);
   if($("#edr")) $("#edr").onclick = () => { EDIT_RECIPE=r.id; ATAB="recipe"; go("admin"); };
   $("#cp").onclick = async () => { const ok = await copyText(r.prompt); toast(ok?"Промпт скопійовано":"Не вдалося скопіювати — виділіть текст вручну"); };
   $("#fv").onclick = () => {
@@ -802,7 +813,7 @@ function viewLessons(){
   app.innerHTML = crumbs(["Головна","home"],["Майстер-класи"]) + ptitle("Майстер-класи","Покрокові інструкції: робіть разом зі мною") + `
   <div class="grid3">${L.length?L.map((l,i)=>{
     const done = (p.lessons[l.id]||[]).length, all=(l.steps||[]).length;
-    return `<article class="rc" data-go="lesson-${esc(l.id)}"><div class="th">${thumb(l.img, l.title, i%2)}</div>
+    return `<article class="rc" data-go="lesson-${esc(l.id)}"><div class="th">${l.img?thumb(l.img,l.title):`<img src="${IMG.pencils}" alt="" style="object-fit:contain;padding:14px">`}</div>
     <div class="bd"><h3>${esc(l.title)}</h3><p>${esc(l.desc)}</p><div class="mini"><span>${esc(l.platform||"")}</span><span>${all} ${plural(all,"крок","кроки","кроків")}</span>${done?`<span>пройдено ${done}/${all}</span>`:""}</div></div></article>`;}).join(""):`<div class="empty">Майстер-класи скоро з'являться.</div>`}</div>`;
 }
 function viewLesson(id){
@@ -999,8 +1010,8 @@ let GF = "all";
 function viewBoard(){
   const ch = DATA.challenge;
   app.innerHTML = crumbs(["Головна","home"],["Дошка досягнень"]) + ptitle("Дошка досягнень","Роботи учасниць спільноти і челендж тижня") + `
-  ${ch?`<div class="chal"><div class="tx"><h2>${esc(ch.title||"Челендж тижня")}</h2><p>${esc(ch.desc)}${ch.until?` · до ${esc(fmtDate(ch.until))}`:""}</p>
-    <button class="btn pill" id="addCh">Надіслати роботу на челендж</button></div><img src="${IMG.target}" alt=""></div>`:""}
+  ${ch?`<div class="chal"><img src="${IMG.target}" alt=""><div class="tx"><h2>${esc(ch.title||"Челендж тижня")}</h2><p>${esc(ch.desc)}${ch.until?` · до ${esc(fmtDate(ch.until))}`:""}</p>
+    <button class="btn pill gold" id="addCh">Надіслати роботу на челендж ›</button></div></div>`:""}
   <div class="tabs"><button data-g="all">Усі роботи</button>${ch?'<button data-g="ch">Челендж тижня</button>':""}<button data-g="mine">Мої роботи</button>
   <button class="btn sm" id="addW" style="margin-left:auto">+ Додати роботу</button></div>
   <div id="gbody"></div>`;
@@ -1067,14 +1078,14 @@ function viewJournal(){
   const p=P(), tr=p.trainers, trDone=Object.keys(TR).filter(k=>tr[k]!=null).length;
   const lessonsDone = DATA.lessons.filter(l=>(p.lessons[l.id]||[]).length===(l.steps||[]).length && (l.steps||[]).length).length;
   const B = [
-    ["Новачок","Увійшли в учительську",true,"var(--teal)","1"],
-    ["Перший день","Виконали челендж трьох днів",p.fav.length>=3&&(tr.builder||0)>0&&p.works>=1,"var(--yellow)","3"],
-    ["Колекціонерка","5 рецептів у журналі",p.fav.length>=5,"var(--coral)","5"],
-    ["Майстриня промптів","Усі тренажери на 80% і більше",Object.keys(TR).every(k=>(tr[k]||0)>=80),"var(--blue)","★"],
-    ["Допитлива","Поставили перше запитання",p.asked>=1,"#8EC5F5","?"],
-    ["Авторка","Надіслали першу роботу",p.works>=1,"#22A05E","✎"],
-    ["Учасниця челенджу","Робота на челендж тижня",p.chWorks>=1,"var(--coral)","◎"],
-    ["Випускниця майстер-класів","Пройшли 2 майстер-класи",lessonsDone>=2,"var(--teal)","2"]
+    ["Новачок","Увійшли в учительську",true,IMG.door],
+    ["Перший день","Виконали челендж трьох днів",p.fav.length>=3&&(tr.builder||0)>0&&p.works>=1,IMG.journal],
+    ["Колекціонерка","5 рецептів у журналі",p.fav.length>=5,IMG.books],
+    ["Майстриня промптів","Усі тренажери на 80% і більше",Object.keys(TR).every(k=>(tr[k]||0)>=80),IMG.laptop],
+    ["Допитлива","Поставили перше запитання",p.asked>=1,IMG.envelope],
+    ["Авторка","Надіслали першу роботу",p.works>=1,IMG.clip],
+    ["Учасниця челенджу","Робота на челендж тижня",p.chWorks>=1,IMG.target],
+    ["Випускниця майстер-класів","Пройшли 2 майстер-класи",lessonsDone>=2,IMG.pencils]
   ];
   const favs = DATA.recipes.filter(r=>p.fav.includes(r.id));
   app.innerHTML = crumbs(["Головна","home"],["Мій журнал"]) + `
@@ -1088,7 +1099,7 @@ function viewJournal(){
     <div class="stat"><b>${p.works}</b><span>робіт надіслано</span></div>
   </div>
   <h2 class="sec">Мої нагороди</h2>
-  <div class="badges">${B.map(b=>`<div class="bdg ${b[2]?"":"off"}"><div class="ico" style="background:${b[3]}">${b[4]}</div><b>${b[0]}</b><span>${b[1]}</span></div>`).join("")}</div>
+  <div class="badges">${B.map(b=>`<div class="bdg ${b[2]?"":"off"}"><img src="${b[3]}" alt=""><b>${b[0]}</b><span>${b[2]?b[1]:"Ще попереду: "+b[1].charAt(0).toLowerCase()+b[1].slice(1)}</span></div>`).join("")}</div>
   <h2 class="sec">Збережені рецепти</h2>
   ${favs.length?`<div class="grid3">${favs.map(rcard).join("")}</div>`:`<div class="empty">Тут з'являться рецепти, які ви додасте кнопкою «До мого журналу». <br><br><button class="btn sm" data-go="recipes">До Методичної скарбнички</button></div>`}
   <h2 class="sec" style="margin-top:28px">Результати тренажерів</h2>
