@@ -939,7 +939,7 @@ async function drawQ(){
     box.innerHTML = `<div class="form" id="qf">
       <div class="types">${QTYPES.map((t,i)=>`<label><input type="radio" name="qt" value="${t}" ${i===0?"checked":""}><span>${t}</span></label>`).join("")}</div>
       <div><label class="lbl" for="qtext">Що вам потрібно?</label><textarea class="ta" id="qtext" maxlength="2000" placeholder="Наприклад: потрібен промпт для карток із словниковими словами для 3 класу в одному стилі"></textarea></div>
-      <div id="pwrap" class="hidden"><label class="lbl" for="qprompt">Ваш промпт</label><textarea class="ta" id="qprompt" maxlength="3000" placeholder="Вставте промпт, який ви використали"></textarea></div>
+      <div id="pwrap" class="hidden"><label class="lbl" for="qprompt">Ваш промпт</label><textarea class="ta" id="qprompt" maxlength="20000" placeholder="Вставте промпт, який ви використали"></textarea></div>
       <div><label class="lbl">Фото результату (необов'язково)</label><div class="drop" id="qdrop">Натисніть, щоб додати зображення</div><input type="file" id="qfile" accept="image/*" class="hidden"></div>
       <div class="note">${esc(CONFIG.ANSWER_TIME)} Відповідь побачите у вкладці «Мої запитання».</div>
       <div><button class="btn" type="button" id="qsend">Надіслати</button></div></div>`;
@@ -1131,7 +1131,7 @@ function aRecipe(box){
       ${fld("ar_platform","Платформа",'<input class="fi" id="ar_platform" list="dl_p" maxlength="40">'+dl("dl_p",[...vals("platform"),"ChatGPT","Gemini","Claude","Canva","Gamma"]))}
     </div>
     ${fld("ar_count","Скільки виходить",'<input class="fi" id="ar_count" maxlength="30" placeholder="4 картки, 1 аркуш, 10 запитань">')}
-    ${fld("ar_prompt","Промпт *",'<textarea class="ta" id="ar_prompt" maxlength="4000" placeholder="Вставте сюди промпт"></textarea>')}
+    ${fld("ar_prompt","Промпт *",'<textarea class="ta" id="ar_prompt" maxlength="20000" placeholder="Вставте сюди промпт"></textarea>')}
     ${fld("ar_tip","Порада",'<input class="fi" id="ar_tip" maxlength="140" placeholder="Змініть тему під свій урок">')}
     <div><label class="lbl">Фото результату</label><div class="drop" id="ar_drop">Натисніть, щоб обрати фото з галереї</div><input type="file" id="ar_file" accept="image/*" class="hidden"></div>
     <label class="chk"><input type="checkbox" id="ar_show" checked> Одразу показати учасницям</label>
@@ -1199,7 +1199,7 @@ async function aQuestions(box){
       ${q.prompt?`<div class="qbox" style="margin:10px 0 0;font-weight:600">${esc(q.prompt)}</div>`:""}
       ${q.photo?`<img src="${esc(q.photo)}" alt="Фото до запитання">`:""}
       <label class="lbl" for="qa_${i}" style="margin-top:12px;font-size:15px">Ваша відповідь</label>
-      <textarea class="ta" id="qa_${i}" style="min-height:90px" maxlength="3000">${esc(q.answer)}</textarea>
+      <textarea class="ta" id="qa_${i}" style="min-height:90px" maxlength="20000">${esc(q.answer)}</textarea>
       <div class="arow"><label class="chk"><input type="checkbox" ${q.public?"checked":""}> Показати всім учасницям</label><button class="btn sm" type="button">Зберегти</button></div>
     </div>`).join("")}</div>` : '<div class="empty">Запитань поки немає.</div>';
     box.querySelectorAll(".qi").forEach(c=>{ const b=c.querySelector(".btn"); b.onclick=async()=>{
