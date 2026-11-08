@@ -454,7 +454,7 @@ body{background:var(--paper)}
 const CONFIG = {
   // Вставте сюди адресу веб-застосунку Apps Script (закінчується на /exec).
   // Поки порожньо — сайт працює в демо-режимі з кодом DEMO.
-  API_URL: "https://script.google.com/macros/s/AKfycby2lMVFRSCHGTW2dYFsRN5MVT53StB9xNc_IDo0EuCoIQ0LtcLI3AUN8WjPTq0NulYmlA/exec",
+  API_URL: "https://script.google.com/macros/s/AKfycbz67lQ6JMMl7Xem_IGpqvvHID0iNQOnVjw8Oo2z8nc8D68g7O6Q8RPk6hJhZmh2Alk-TA/exec",
   // Посилання на «Майстерню ідей» і текст про знижку для учасниць
   MAYSTERNIA_URL: "https://galinagayday89-stack.github.io/kramnytsia-idei/",
   MAYSTERNIA_TEXT: "Навчальні матеріали від Галини Гайдай",
@@ -1128,7 +1128,7 @@ let EDIT_RECIPE = "";
 async function aRecipe(box){
   const R=DATA.recipes, vals=k=>R.map(r=>r[k]);
   box.innerHTML='<div class="load"><div class="spin"></div></div>';
-  let ALL=[]; try{ const r=await api("adminRecipes"); ALL=r.items||[]; }catch(err){ if(err.message==="auth") return; }
+  let ALL=[]; try{ const r=await api("adminRecipes"); ALL=r.items||[]; if(!r.ok) toast("Список рецептів не завантажився: "+(r.message||"оновіть скрипт таблиці")); }catch(err){ if(err.message==="auth") return; }
   const cur = ALL.find(r=>String(r.id)===String(EDIT_RECIPE)) || null;
   if(!cur) EDIT_RECIPE="";
   box.innerHTML = `<div class="form">
