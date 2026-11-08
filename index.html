@@ -271,6 +271,58 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .hid-tag{background:#EEE;color:#555;font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;align-self:flex-start}
 .btn.del{color:var(--err);border-color:var(--err)}
 .btn.del:hover{background:#FDECEA}
+.pstrip{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px;margin-top:18px;background:linear-gradient(105deg,#FFF6DA 0%,#FFFDF6 55%,#EAF4FF 100%);border-radius:var(--r);padding:22px 26px;box-shadow:var(--shadow);cursor:pointer}
+.pstrip .tx{border-left:5px solid var(--yellow);padding-left:16px;min-width:0}
+.pstrip h3{font-size:clamp(24px,2.6vw,36px);font-weight:800}
+.pstrip p{margin:6px 0 14px;font-size:17px}
+.pstrip img{width:min(260px,30vw);height:auto;border-radius:16px;box-shadow:0 12px 26px rgba(14,28,110,.18);transform:rotate(2deg)}
+.pj-eye{font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#B7801A}
+.pj-th{background:#0E1C3E}
+.pj-th img{object-fit:contain!important}
+.pj-cover{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,6fr);gap:30px;align-items:center;margin:10px 0 26px}
+.pj-cover img{width:100%;height:auto;border-radius:20px;box-shadow:0 16px 36px rgba(14,28,110,.18);cursor:zoom-in}
+.pj-cover h1{font-size:clamp(34px,5vw,58px);margin:8px 0 10px}
+.pj-lead{font-size:18px;color:var(--muted);margin:0 0 14px}
+.pj-auth{list-style:none;padding:0;margin:0 0 16px;display:grid;gap:6px}
+.pj-auth li{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:6px}
+.pj-auth b{color:var(--navy)}
+.pj-auth span{color:var(--muted);font-size:15px}
+.pj-intro{background:var(--cream);border-radius:18px;padding:18px 22px;display:grid;gap:8px;margin-bottom:10px}
+.pj-toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:10px}
+.pj-toc button{display:flex;gap:10px;align-items:center;text-align:left;border:0;background:var(--sky);border-radius:14px;padding:10px 12px;font:inherit;font-weight:700;color:var(--navy);cursor:pointer;line-height:1.25}
+.pj-toc b,.pj-num{background:radial-gradient(circle at 35% 30%,#FFE07A,#E0A21C);color:var(--navy);font-family:var(--disp)}
+.pj-toc b{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center}
+.pj-part{margin-top:46px;scroll-margin-top:90px}
+.pj-part>header{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.pj-num{flex:none;width:76px;height:76px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(224,162,28,.35)}
+.pj-num span{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;line-height:1}
+.pj-num b{font-size:32px;line-height:1}
+.pj-part h2{font-size:clamp(24px,3.4vw,34px)}
+.pj-by{margin:4px 0 0;color:var(--muted)}
+.pj-by b{color:var(--blue)}
+.pj-gal{display:grid;gap:12px;margin-bottom:18px}
+.pj-gal.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pj-gal.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pj-gal img{width:100%;height:auto;border-radius:14px;cursor:zoom-in;box-shadow:0 8px 20px rgba(14,28,110,.10)}
+.pj-body{display:grid;gap:10px;max-width:760px;font-size:17px}
+.pj-body p{margin:0}
+.pj-body h3{font-size:21px;margin-top:10px}
+.pj-body h3.found{color:#B7801A}
+.pj-body blockquote{margin:0;padding:12px 18px;border-radius:14px;background:var(--sky);font-style:italic}
+.pj-list{margin:0;padding-left:1.5em;display:grid;gap:5px}
+.pj-list li::marker{font-weight:800;color:var(--blue)}
+.pj-pass{border:2px dashed #E0A21C;border-radius:14px;padding:10px 16px;background:#fff}
+.pj-pass span{display:block;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#B7801A}
+.pj-pass p{margin:2px 0 0}
+.pj-ans{margin-top:50px}
+.pj-ans summary{cursor:pointer;font-family:var(--disp);font-weight:800;color:var(--navy);font-size:24px;padding:14px 18px;background:var(--cream);border-radius:16px}
+.pj-ans .mtable{margin-top:12px}
+.pj-ans td.wrap{white-space:normal;min-width:260px}
+.p-imgs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.p-im{position:relative}
+.p-im img{width:96px;height:72px;object-fit:cover;border-radius:10px;display:block}
+.p-im button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--navy);color:#fff;cursor:pointer;font-size:12px}
+@media (max-width:760px){.pj-cover{grid-template-columns:1fr}.pj-cover img{max-width:360px}.pj-gal.g3{grid-template-columns:1fr}.pstrip{grid-template-columns:1fr}.pstrip img{width:100%;max-width:320px;transform:none}.pj-num{width:62px;height:62px}.pj-num b{font-size:26px}}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -611,11 +663,15 @@ async function demoApi(action, p){
     case "data": return Object.assign({ok:true}, DEMO_DATA, {
       recipes:[...(st.recipes||[]).map(r=>Object.assign({},r,{hidden:!r.show})), ...DEMO_DATA.recipes],
       lessons:[...DEMO_DATA.lessons, ...(st.lessons||[]).map(l=>Object.assign({},l,{hidden:!l.show}))],
+      projects:(st.projects||[]).map(x=>Object.assign({},x,{hidden:!x.show})),
       challenge: st.challenge || DEMO_DATA.challenge, role:"admin"});
+    case "adminProjects": return {ok:true, items:(st.projects||[])};
+    case "adminAddProject": { const id="p"+Date.now(); (st.projects=st.projects||[]).unshift(Object.assign({id, show:p.show}, p.project)); lsSet("cu_demo",st); return {ok:true,id}; }
+    case "adminUpdateProject": { const x=(st.projects||[]).find(y=>y.id===p.id); if(!x) return {ok:false,message:"Проєкт не знайдено"}; const cv=x.cover; Object.assign(x,p.project,{show:p.show}); if(!p.project.cover) x.cover=cv; lsSet("cu_demo",st); return {ok:true}; }
     case "adminAddRecipe": (st.recipes=st.recipes||[]).unshift(Object.assign({id:"r"+Date.now(), img:p.photo||"", show:p.show}, p.recipe)); lsSet("cu_demo",st); return {ok:true};
     case "adminOverview": return {ok:true, questionsWaiting:(st.questions||[]).filter(q=>!q.answer).length+1, worksWaiting:(st.works||[]).filter(w=>!w.approved&&!w.rejected).length+(st.seedW?0:1), recipes:DEMO_DATA.recipes.length+(st.recipes||[]).length, challengeWorks:1,
       members:[{name:"Галина Гайдай",code:"DEMO",validTo:"",active:true,admin:true,lastLogin:new Date().toISOString().slice(0,10)},{name:"Олена Петренко",code:"UCH-HEBM8",validTo:"2026-12-08",active:true,lastLogin:"2026-11-07"},{name:"Ірина Коваль",code:"UCH-M3HVT",validTo:"2026-11-10",active:true,lastLogin:""},{name:"Наталія Мельник",code:"UCH-TC2AB",validTo:"2026-11-01",active:true,lastLogin:"2026-10-30"}]};
-    case "adminDelete": { const k=p.kind==="lesson"?"lessons":"recipes"; st[k]=(st[k]||[]).filter(x=>x.id!==p.id); lsSet("cu_demo",st); return {ok:true}; }
+    case "adminDelete": { const k=p.kind==="lesson"?"lessons":p.kind==="project"?"projects":"recipes"; st[k]=(st[k]||[]).filter(x=>x.id!==p.id); lsSet("cu_demo",st); return {ok:true}; }
     case "adminLessons": return {ok:true, items:[...DEMO_DATA.lessons.map(l=>Object.assign({show:true},l)), ...(st.lessons||[])]};
     case "adminUpdateLesson": { const l=(st.lessons||[]).find(x=>x.id===p.id); if(!l) return {ok:false,message:"Приклади з демо не редагуються — додайте свій урок"}; Object.assign(l,p.lesson,{show:p.show}); lsSet("cu_demo",st); return {ok:true}; }
     case "adminRecipes": return {ok:true, items:[...(st.recipes||[]), ...DEMO_DATA.recipes.map(r=>Object.assign({show:true},r))]};
@@ -696,9 +752,10 @@ async function ensureData(){
   DATA = lsGet("cu_cache_"+S.code, null);
   try{
     const r = await api("data");
-    if(r.ok){ DATA = {recipes:r.recipes||[], lessons:r.lessons||[], challenge:r.challenge||null}; lsSet("cu_cache_"+S.code, DATA); if(r.name){S.name=r.name; S.validTo=r.validTo; S.role=r.role||S.role; lsSet("cu_session",S);} }
+    if(r.ok){ DATA = {recipes:r.recipes||[], lessons:r.lessons||[], projects:r.projects||[], challenge:r.challenge||null}; lsSet("cu_cache_"+S.code, DATA); if(r.name){S.name=r.name; S.validTo=r.validTo; S.role=r.role||S.role; lsSet("cu_session",S);} }
   }catch(e){ if(e.message==="auth") throw e; }
-  if(!DATA) DATA={recipes:[],lessons:[],challenge:null};
+  if(!DATA) DATA={recipes:[],lessons:[],projects:[],challenge:null};
+  if(!DATA.projects) DATA.projects=[];
   if(DATA.challenge && DATA.challenge.until){ const u=new Date(DATA.challenge.until+"T23:59:59"); if(!isNaN(u) && u<new Date()) DATA.challenge=null; }
   return DATA;
 }
@@ -721,7 +778,7 @@ async function render(){
   window.scrollTo(0,0);
   loading();
   try{ await ensureData(); }catch(e){ return; }
-  const V = {rating:viewRating,admin:viewAdmin,home:viewHome,start:viewStart,recipes:viewRecipes,recipe:viewRecipe,lessons:viewLessons,lesson:viewLesson,
+  const V = {projects:viewProjects,project:viewProject,rating:viewRating,admin:viewAdmin,home:viewHome,start:viewStart,recipes:viewRecipes,recipe:viewRecipe,lessons:viewLessons,lesson:viewLesson,
              trainers:viewTrainers,trainer:viewTrainer,questions:viewQuestions,board:viewBoard,journal:viewJournal};
   (V[route]||viewHome)(id);
 }
@@ -756,6 +813,10 @@ function viewHome(){
     ${tile("journal","Мій журнал",IMG.journal,"y")}
     ${tile("rating","Рейтинг місяця",IMG.target,"t")}
   </section>
+  ${(()=>{ const P0=(DATA.projects||[]); const pr=P0[0]; return `<section class="pstrip" data-go="projects" role="link" tabindex="0">
+    <div class="tx"><div class="pj-eye">Створено разом</div><h3>Спільні проєкти</h3><p>${pr?`Наш новий спільний проєкт: <b>${esc(pr.title)}</b>${pAuthors(pr).length?`. Авторки: ${esc(pAuthors(pr).join(", "))}`:""}`:"Квести, естафети й інші матеріали, які учасниці спільноти створюють разом"}</p>
+    <span class="btn pill gold">Переглянути ›</span></div>
+    ${pr&&pr.cover?`<img src="${esc(pr.cover)}" alt="">`:""}</section>`; })()}
   <section class="banners">
     <div class="banner sky">
       <div class="tx"><h3>${esc(ch?ch.title||"Челендж тижня":"Челендж тижня")}</h3><p>${esc(ch?ch.desc:"Новий челендж скоро з'явиться")}</p>
@@ -792,6 +853,7 @@ function viewStart(){
     <div><b>Скринька запитань</b>Напишіть, що вам потрібно, або надішліть свій промпт на розбір — я відповім особисто.</div>
     <div><b>Дошка досягнень</b>Галерея робіт учасниць і челендж тижня. Надсилайте свої матеріали й надихайте інших.</div>
     <div><b>Мій журнал</b>Збережені рецепти, результати тренажерів і ваші нагороди.</div>
+    <div><b>Спільні проєкти</b>Квести й естафети, які ми створюємо разом у Telegram. Готова робота з іменами всіх авторок.</div>
   </div>`;
 }
 
@@ -1249,6 +1311,57 @@ async function makeCert(name, place, ym){
   c.toBlob(b=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=`Сертифікат — ${name} — ${monthName(ym)}.png`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); toast("Сертифікат завантажено"); },"image/png");
 }
 
+/* ---------- СПІЛЬНІ ПРОЄКТИ ---------- */
+function pmark(t){
+  const out=[]; let ul=[];
+  const flush=()=>{ if(ul.length){ out.push('<ol class="pj-list">'+ul.map(x=>`<li>${esc(x)}</li>`).join("")+'</ol>'); ul=[]; } };
+  String(t||"").split("\n").forEach(raw=>{
+    const l=raw.trim(); if(!l){ flush(); return; }
+    if(/^- /.test(l)){ ul.push(l.slice(2)); return; }
+    flush();
+    if(/^## /.test(l)){ const h=l.slice(3); out.push(`<h3 class="${/знайдено|відкрито/i.test(h)?"found":""}">${esc(h)}</h3>`); }
+    else if(/^> /.test(l)) out.push(`<blockquote>${esc(l.slice(2))}</blockquote>`);
+    else if(/^! /.test(l)) out.push(`<div class="pj-pass"><span>Секретний пароль</span><p>${esc(l.slice(2))}</p></div>`);
+    else out.push(`<p>${esc(l)}</p>`);
+  });
+  flush(); return out.join("");
+}
+const pAuthors = pr => [...new Set((pr.parts||[]).map(x=>String(x.author||"").trim()).filter(Boolean))];
+function viewProjects(){
+  const L=DATA.projects||[];
+  app.innerHTML = crumbs(["Головна","home"],["Спільні проєкти"]) + ptitle("Спільні проєкти","Навчальні матеріали, які учасниці спільноти створили разом") + `
+  <div class="grid3">${L.length?L.map(pr=>{ const a=pAuthors(pr), n=(pr.parts||[]).length;
+    return `<article class="rc" data-go="project-${esc(pr.id)}"><div class="th pj-th">${pr.cover?`<img src="${esc(pr.cover)}" alt="" loading="lazy">`:`<div class="ph">${esc(pr.title)}</div>`}</div>
+    <div class="bd">${pr.hidden?HID:""}<h3>${esc(pr.title)}</h3><p>${esc(pr.desc)}</p>
+    <div class="mini"><span>${n} ${plural(n,"частина","частини","частин")}</span><span>${a.length} ${plural(a.length,"авторка","авторки","авторок")}</span></div></div></article>`;}).join(""):`<div class="empty">Перший спільний проєкт скоро з'явиться.</div>`}</div>`;
+}
+function viewProject(id){
+  const pr=(DATA.projects||[]).find(x=>String(x.id)===String(id));
+  if(!pr){ app.innerHTML=crumbs(["Спільні проєкти","projects"],["Проєкт"])+`<div class="empty">Проєкт не знайдено.</div>`; return; }
+  const parts=pr.parts||[], A={};
+  parts.forEach((x,i)=>{ const a=String(x.author||"").trim(); if(a) (A[a]=A[a]||[]).push(x.n||i+1); });
+  const word=parts.length&&/ключ/i.test(pr.title)?"Ключ":"Частина";
+  const ans=parts.filter(x=>x.answer||x.password);
+  app.innerHTML = crumbs(["Спільні проєкти","projects"],[pr.title]) + (pr.hidden?'<div class="note" style="margin:6px 0 14px">Проєкт схований: так його побачать учасниці, коли ви ввімкнете «Показувати учасницям».</div>':"") + `
+  <section class="pj-cover">
+    ${pr.cover?`<img src="${esc(pr.cover)}" alt="Обкладинка проєкту «${esc(pr.title)}»">`:""}
+    <div class="pj-ctx"><div class="pj-eye">Спільний проєкт спільноти</div><h1>${esc(pr.title)}</h1>${pr.desc?`<p class="pj-lead">${esc(pr.desc)}</p>`:""}
+      <ul class="pj-auth">${Object.keys(A).map(a=>`<li><b>${esc(a)}</b><span>${A[a].length>1?word==="Ключ"?"ключі":"частини":word==="Ключ"?"ключ":"частина"} ${A[a].join(", ")}</span></li>`).join("")}</ul>
+      ${isAdmin()?'<button class="btn ghost sm" id="edp" type="button">✏️ Редагувати проєкт</button>':""}</div>
+  </section>
+  ${pr.intro?`<section class="pj-intro">${pmark(pr.intro)}</section>`:""}
+  ${parts.length>2?`<h2 class="sec">Зміст</h2><div class="pj-toc">${parts.map((x,i)=>`<button type="button" data-pj="${i}"><b>${esc(x.n||i+1)}</b><span>${esc(x.title)}</span></button>`).join("")}</div>`:""}
+  ${parts.map((x,i)=>`<section class="pj-part" id="pj-${i}">
+    <header><div class="pj-num"><span>${word}</span><b>${esc(x.n||i+1)}</b></div><div style="min-width:0"><h2>${esc(x.title)}</h2>${x.author?`<p class="pj-by">Авторка: <b>${esc(x.author)}</b></p>`:""}</div></header>
+    ${(x.imgs||[]).length?`<div class="pj-gal g${Math.min(3,x.imgs.length)}">${x.imgs.map(u=>`<img class="simg" src="${esc(u)}" alt="Ілюстрація: ${esc(x.title)}" loading="lazy">`).join("")}</div>`:""}
+    <div class="pj-body">${pmark(x.text)}</div></section>`).join("")}
+  ${ans.length?`<details class="pj-ans"><summary>Відповіді для вчителя</summary><div class="mtable"><table><thead><tr><th>№</th><th>Відповіді</th><th>Пароль</th></tr></thead><tbody>
+    ${parts.map((x,i)=>x.answer||x.password?`<tr><td>${esc(x.n||i+1)}</td><td class="wrap"><b>${esc(x.title)}</b><br>${esc(x.answer||"")}</td><td><b>${esc(x.password||"")}</b></td></tr>`:"").join("")}</tbody></table></div></details>`:""}`;
+  app.querySelectorAll("[data-pj]").forEach(b=>b.onclick=()=>{ const el=$("#pj-"+b.dataset.pj); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); });
+  app.querySelectorAll(".simg,.pj-cover img").forEach(im=>im.onclick=()=>modal(`<img class="zoom" src="${esc(im.src)}" alt="">`, true));
+  if($("#edp")) $("#edp").onclick=()=>{ EDIT_PROJECT=pr.id; ATAB="project"; go("admin"); };
+}
+
 /* ---------- КАБІНЕТ АВТОРКИ ---------- */
 const isAdmin = () => !!(S && S.role==="admin");
 let ATAB = "overview";
@@ -1265,7 +1378,7 @@ async function adminSend(btn, action, payload, okMsg, after){
 }
 function viewAdmin(){
   if(!isAdmin()){ viewHome(); return; }
-  const T=[["overview","Огляд"],["recipe","Рецепти"],["lesson","Уроки"],["challenge","Челендж"],["questions","Запитання"],["works","Роботи"],["import","Імпорт"]];
+  const T=[["overview","Огляд"],["recipe","Рецепти"],["lesson","Уроки"],["challenge","Челендж"],["project","Проєкти"],["questions","Запитання"],["works","Роботи"],["import","Імпорт"]];
   app.innerHTML = crumbs(["Головна","home"],["Кабінет авторки"]) + ptitle("Кабінет авторки","Додавайте матеріали й відповідайте учасницям просто з телефона") + `
   <div class="tabs">${T.map(t=>`<button data-a="${t[0]}">${t[1]}</button>`).join("")}</div>
   <div id="abody"></div>`;
@@ -1275,7 +1388,7 @@ function viewAdmin(){
 function drawA(){
   app.querySelectorAll("[data-a]").forEach(b=>b.classList.toggle("on", b.dataset.a===ATAB));
   const box=$("#abody");
-  ({overview:aOverview,recipe:aRecipe,lesson:aLesson,challenge:aChallenge,questions:aQuestions,works:aWorks,import:aImport})[ATAB](box);
+  ({project:aProject,overview:aOverview,recipe:aRecipe,lesson:aLesson,challenge:aChallenge,questions:aQuestions,works:aWorks,import:aImport})[ATAB](box);
 }
 let EDIT_RECIPE = "";
 async function aRecipe(box){
@@ -1340,7 +1453,7 @@ async function aOverview(box){
 }
 function aImport(box){
   box.innerHTML = `<div class="form">
-    <div class="note">Тут можна додати одразу багато рецептів або уроків з файлу, який підготує для вас Claude (файл <b>.json</b>). Вони з'являться на сайті разом з фото.</div>
+    <div class="note">Тут можна додати одразу багато рецептів, уроків або спільний проєкт з файлу, який підготує для вас Claude (файл <b>.json</b>). Вони з'являться на сайті разом з фото.</div>
     <div><label class="lbl">Файл для імпорту</label><div class="drop" id="im_drop">Натисніть, щоб обрати файл .json</div><input type="file" id="im_file" accept=".json,application/json" class="hidden"></div>
     <div id="im_list"></div>
   </div>`;
@@ -1351,17 +1464,18 @@ function aImport(box){
     try{ const j=JSON.parse(await f.text());
       const rs=(Array.isArray(j)?j:(j.recipes||[])).filter(r=>r&&r.title&&r.prompt).map(r=>Object.assign({kind:"recipe"},r));
       const ls=(Array.isArray(j)?[]:(j.lessons||[])).filter(l=>l&&l.title&&Array.isArray(l.steps)).map(l=>Object.assign({kind:"lesson",prompt:l.desc||""},l));
-      items=[...ls,...rs];
-      const have=new Set([...(DATA.lessons||[]).map(x=>"lesson|"+String(x.title).trim().toLowerCase()), ...(DATA.recipes||[]).map(x=>"recipe|"+String(x.title).trim().toLowerCase())]);
+      const ps=(Array.isArray(j)?[]:(j.projects||[])).filter(x=>x&&x.title&&Array.isArray(x.parts)).map(x=>Object.assign({kind:"project",prompt:x.desc||"",photo:x.cover||""},x));
+      items=[...ps,...ls,...rs];
+      const have=new Set([...(DATA.projects||[]).map(x=>"project|"+String(x.title).trim().toLowerCase()), ...(DATA.lessons||[]).map(x=>"lesson|"+String(x.title).trim().toLowerCase()), ...(DATA.recipes||[]).map(x=>"recipe|"+String(x.title).trim().toLowerCase())]);
       items.forEach(x=>x.exists=have.has(x.kind+"|"+String(x.title).trim().toLowerCase())); }
     catch(e){ toast("Не вдалося прочитати файл. Потрібен файл .json від Claude"); return; }
-    if(!items.length){ toast("У файлі немає рецептів чи уроків"); return; }
-    const nr=items.filter(x=>x.kind==="recipe").length, nl2=items.length-nr;
-    $("#im_drop").textContent=f.name+" · "+[nl2?"уроків: "+nl2:"",nr?"рецептів: "+nr:""].filter(Boolean).join(", ")+" (натисніть, щоб обрати інший)";
+    if(!items.length){ toast("У файлі немає рецептів, уроків чи проєктів"); return; }
+    const nr=items.filter(x=>x.kind==="recipe").length, np=items.filter(x=>x.kind==="project").length, nl2=items.length-nr-np;
+    $("#im_drop").textContent=f.name+" · "+[np?"проєктів: "+np:"",nl2?"уроків: "+nl2:"",nr?"рецептів: "+nr:""].filter(Boolean).join(", ")+" (натисніть, щоб обрати інший)";
     $("#im_list").innerHTML=`<label class="chk" style="margin-bottom:10px"><input type="checkbox" id="im_all" checked> Обрати всі</label>
       <div class="qa">${items.map((r,i)=>`<label class="qi chk" style="align-items:flex-start;gap:14px"><input type="checkbox" data-i="${i}" ${r.exists?"":"checked"} style="margin-top:4px">
         ${r.photo?`<img src="${esc(r.photo)}" alt="" style="width:84px;height:84px;object-fit:contain;margin:0;border-radius:10px;background:#F3F6FB;flex:none">`:""}
-        <span style="min-width:0">${r.exists?'<span class="badge b-wait">вже є на сайті</span> ':""}<span class="badge b-type">${r.kind==="lesson"?"Урок · "+r.steps.length+" "+plural(r.steps.length,"крок","кроки","кроків"):"Рецепт"}</span><br><b style="font-family:var(--disp);color:var(--navy);font-size:17px">${esc(r.title)}</b><br><span style="font-weight:600;color:var(--muted);font-size:14px">${esc([r.type,r.subject,r.grade,r.platform].filter(Boolean).join(" · "))}</span>
+        <span style="min-width:0">${r.exists?'<span class="badge b-wait">вже є на сайті</span> ':""}<span class="badge b-type">${r.kind==="project"?"Спільний проєкт · "+r.parts.length+" "+plural(r.parts.length,"частина","частини","частин"):r.kind==="lesson"?"Урок · "+r.steps.length+" "+plural(r.steps.length,"крок","кроки","кроків"):"Рецепт"}</span><br><b style="font-family:var(--disp);color:var(--navy);font-size:17px">${esc(r.title)}</b><br><span style="font-weight:600;color:var(--muted);font-size:14px">${esc([r.type,r.subject,r.grade,r.platform].filter(Boolean).join(" · "))}</span>
         <span style="display:block;font-weight:400;font-size:14px;margin-top:4px">${esc(String(r.prompt).slice(0,160))}${String(r.prompt).length>160?"…":""}</span></span></label>`).join("")}</div>
       <label class="chk" style="margin:14px 0"><input type="checkbox" id="im_show" checked> Одразу показати учасницям</label>
       <button class="btn" type="button" id="im_go">Додати обрані</button><div id="im_prog" class="note hidden" style="margin-top:12px"></div>`;
@@ -1375,12 +1489,72 @@ function aImport(box){
         const r=pick[i]; pr.textContent=`Додаю ${i+1} з ${pick.length}: ${r.title}…`;
         const recipe={title:r.title,desc:r.desc||"",subject:r.subject||"",grade:r.grade||"",type:r.type||"",platform:r.platform||"",count:r.count||"",prompt:r.prompt,tip:r.tip||""};
         const lesson={title:r.title,desc:r.desc||"",platform:r.platform||"",video:r.video||"",steps:(r.steps||[]).map(s=>Array.isArray(s)?s:[s.title||"",s.text||"",s.prompt||"",s.img||""])};
-        try{ const res=r.kind==="lesson"?await api("adminAddLesson",{lesson,show:$("#im_show").checked}):await api("adminAddRecipe",{recipe,photo:r.photo||"",show:$("#im_show").checked}); if(res.ok) ok++; else fail.push(r.title); }
+        const project={title:r.title,desc:r.desc||"",intro:r.intro||"",cover:r.cover||"",parts:r.parts||[]};
+        if(r.kind==="project") pr.textContent=`Додаю «${r.title}» з ілюстраціями… Це може зайняти до хвилини, не закривайте сторінку.`;
+        try{ const res=r.kind==="project"?await api("adminAddProject",{project,show:$("#im_show").checked}):r.kind==="lesson"?await api("adminAddLesson",{lesson,show:$("#im_show").checked}):await api("adminAddRecipe",{recipe,photo:r.photo||"",show:$("#im_show").checked}); if(res.ok) ok++; else fail.push(r.title); }
         catch(e){ if(e.message==="auth") return; fail.push(r.title); }
       }
       pr.innerHTML=`Готово! Додано: <b>${ok}</b>.`+(fail.length?`<br>Не вдалося: ${fail.map(esc).join(", ")}. Спробуйте їх ще раз.`:"");
       b.disabled=false; DATA=null; lsSet("cu_cache_"+S.code,null); await ensureData(); toast("Імпорт завершено");
     };
+  };
+}
+let EDIT_PROJECT = "";
+async function aProject(box){
+  box.innerHTML='<div class="load"><div class="spin"></div></div>';
+  let ALL=[]; try{ const r=await api("adminProjects"); ALL=r.items||[]; if(!r.ok) toast("Список проєктів не завантажився: "+(r.message||"оновіть скрипт таблиці")); }catch(err){ if(err.message==="auth") return; }
+  const cur = ALL.find(x=>String(x.id)===String(EDIT_PROJECT)) || null; if(!cur) EDIT_PROJECT="";
+  box.innerHTML = `<div class="form">
+    <div class="editpick"><label class="lbl" for="ap_pick">Редагувати проєкт</label>
+      <select class="sel" id="ap_pick"><option value="">+ Новий проєкт</option>${ALL.map(x=>`<option value="${esc(x.id)}" ${cur&&String(cur.id)===String(x.id)?"selected":""}>${esc(x.title)}${x.show?"":" (схований)"}</option>`).join("")}</select></div>
+    ${cur?`<div class="note">Ви редагуєте проєкт «${esc(cur.title)}». Змініть потрібне і натисніть «Зберегти зміни».</div>
+      <div><button class="btn gold pill" type="button" id="ap_view">👁 Переглянути проєкт, як учасниця</button></div>`:`<div class="note">Готову спільну роботу з Telegram найпростіше додати через вкладку «Імпорт» — файл підготує Claude. Тут можна створити проєкт вручну або виправити вже доданий.</div>`}
+    ${fld("ap_title","Назва проєкту *",'<input class="fi" id="ap_title" maxlength="90" placeholder="Наприклад: Таємниця 12 ключів">')}
+    ${fld("ap_desc","Короткий опис",'<input class="fi" id="ap_desc" maxlength="200" placeholder="Що це за матеріал і для кого">')}
+    <div><label class="lbl">Обкладинка</label><div class="drop" id="ap_drop">${cur&&cur.cover?`<img src="${esc(cur.cover)}" alt="Поточна обкладинка">Натисніть, щоб замінити`:"Натисніть, щоб обрати картинку"}</div><input type="file" id="ap_file" accept="image/*" class="hidden"></div>
+    ${fld("ap_intro","Вступ",'<textarea class="ta" id="ap_intro" maxlength="5000" style="min-height:90px" placeholder="Як проводити, для якого класу (необов\'язково)"></textarea>')}
+    <div><label class="lbl">Частини *</label>
+      <div class="note" style="margin-bottom:10px;font-size:14px">У тексті можна позначати: <b>## </b>підзаголовок, <b>- </b>пункт списку, <b>&gt; </b>лист чи цитата, <b>! </b>секретний пароль. Звичайний текст теж підходить.</div>
+      <div id="ap_parts" class="srows"></div>
+      <button type="button" class="btn ghost sm" id="ap_add" style="margin-top:10px">+ Додати частину</button></div>
+    <label class="chk"><input type="checkbox" id="ap_show" ${!cur||cur.show?"checked":""}> ${cur?"Показувати учасницям":"Одразу показати учасницям"}</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="ap_send">${cur?"Зберегти зміни":"Додати проєкт"}</button>${cur?'<button class="btn ghost" type="button" id="ap_new">Скасувати</button><button class="btn ghost del" type="button" id="ap_del">🗑 Видалити проєкт</button>':""}</div>
+  </div>`;
+  const renum=()=>[...$("#ap_parts").children].forEach((d,i)=>d.querySelector(":scope>b").textContent=i+1);
+  const add = (pt) => { pt=pt||{}; const d=document.createElement("div"); d.className="srow";
+    d.innerHTML=`<b></b><div><div class="two" style="gap:8px"><input class="fi p-t" placeholder="Назва частини" maxlength="90"><input class="fi p-a" placeholder="Авторка" maxlength="80"></div>
+      <textarea class="ta p-x" style="min-height:140px;margin-top:8px" placeholder="Текст частини: історія і завдання" maxlength="12000"></textarea>
+      <div class="two" style="gap:8px;margin-top:8px"><input class="fi p-ans" placeholder="Відповіді для вчителя" maxlength="1500"><input class="fi p-pw" placeholder="Пароль" maxlength="40"></div>
+      <div class="p-imgs"></div>
+      <div class="drop p-drop" style="margin-top:8px;padding:12px">+ Додати ілюстрацію</div><input type="file" accept="image/*" class="hidden p-file">
+      <button type="button" class="btn ghost sm del p-rm" style="margin-top:8px">Прибрати частину</button></div>`;
+    $("#ap_parts").appendChild(d);
+    d.querySelector(".p-t").value=pt.title||""; d.querySelector(".p-a").value=pt.author||""; d.querySelector(".p-x").value=pt.text||"";
+    d.querySelector(".p-ans").value=pt.answer||""; d.querySelector(".p-pw").value=pt.password||"";
+    const imgs=(pt.imgs||[]).slice(); d._imgs=imgs;
+    const drawI=()=>{ d.querySelector(".p-imgs").innerHTML=imgs.map((u,k)=>`<div class="p-im"><img src="${esc(u)}" alt=""><button type="button" data-k="${k}" aria-label="Прибрати ілюстрацію">✕</button></div>`).join("");
+      d.querySelectorAll(".p-im button").forEach(b=>b.onclick=()=>{ imgs.splice(+b.dataset.k,1); drawI(); }); };
+    drawI();
+    pickImage(d.querySelector(".p-drop"), d.querySelector(".p-file"), u=>{ imgs.push(u); drawI(); d.querySelector(".p-drop").textContent="+ Додати ще ілюстрацію"; });
+    d.querySelector(".p-rm").onclick=e=>{ const b=e.currentTarget; if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, прибрати"; return; } d.remove(); renum(); };
+    renum(); };
+  if(cur){ $("#ap_title").value=cur.title||""; $("#ap_desc").value=cur.desc||""; $("#ap_intro").value=cur.intro||""; (cur.parts||[]).forEach(add); }
+  else { add(); add(); }
+  let cover=""; pickImage($("#ap_drop"), $("#ap_file"), u=>cover=u);
+  $("#ap_add").onclick = () => add();
+  $("#ap_pick").onchange = e => { EDIT_PROJECT=e.target.value; aProject(box); };
+  if($("#ap_view")) $("#ap_view").onclick = () => go("project-"+cur.id);
+  if($("#ap_new")) $("#ap_new").onclick = () => { EDIT_PROJECT=""; aProject(box); };
+  if($("#ap_del")) $("#ap_del").onclick = e => { const b=e.currentTarget; if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, видалити назавжди"; return; }
+    adminSend(b,"adminDelete",{kind:"project",id:cur.id},"Проєкт видалено",()=>{ EDIT_PROJECT=""; aProject(box); }); };
+  $("#ap_send").onclick = () => {
+    const v=id=>$("#"+id).value.trim();
+    const parts=[...$("#ap_parts").children].map(d=>({title:d.querySelector(".p-t").value.trim(),author:d.querySelector(".p-a").value.trim(),text:d.querySelector(".p-x").value.trim(),
+      answer:d.querySelector(".p-ans").value.trim(),password:d.querySelector(".p-pw").value.trim(),imgs:d._imgs||[]})).filter(x=>x.title||x.text);
+    const project={title:v("ap_title"),desc:v("ap_desc"),intro:v("ap_intro"),cover,parts};
+    if(!project.title || !parts.length){ toast("Вкажіть назву і хоча б одну частину"); return; }
+    if(cur) adminSend($("#ap_send"),"adminUpdateProject",{id:cur.id,project,show:$("#ap_show").checked},"Зміни збережено!",()=>aProject(box));
+    else adminSend($("#ap_send"),"adminAddProject",{project,show:$("#ap_show").checked},"Проєкт додано!",r=>{ EDIT_PROJECT=r.id||""; aProject(box); });
   };
 }
 let EDIT_LESSON = "";
