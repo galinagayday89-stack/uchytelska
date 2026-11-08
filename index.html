@@ -238,6 +238,7 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .like svg{width:18px;height:18px}
 .adminbar{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;border:2px dashed var(--blue);background:#F5F9FF;border-radius:18px;padding:14px 20px;margin:-8px 0 18px;cursor:pointer;font-family:var(--disp);font-weight:800;color:var(--navy);font-size:17px;text-align:left}
 .adminbar span{color:var(--blue);font-size:15px}
+.editpick{background:var(--sky);border-radius:16px;padding:14px 16px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -565,6 +566,8 @@ async function demoApi(action, p){
       lessons:[...DEMO_DATA.lessons, ...(st.lessons||[]).filter(l=>l.show)],
       challenge: st.challenge || DEMO_DATA.challenge, role:"admin"});
     case "adminAddRecipe": (st.recipes=st.recipes||[]).unshift(Object.assign({id:"r"+Date.now(), img:p.photo||"", show:p.show}, p.recipe)); lsSet("cu_demo",st); return {ok:true};
+    case "adminRecipes": return {ok:true, items:[...(st.recipes||[]), ...DEMO_DATA.recipes.map(r=>Object.assign({show:true},r))]};
+    case "adminUpdateRecipe": { const r=(st.recipes||[]).find(x=>x.id===p.id); if(!r) return {ok:false,message:"Приклади з демо не редагуються — додайте свій рецепт"}; Object.assign(r,p.recipe,{show:p.show}); if(p.photo) r.img=p.photo; lsSet("cu_demo",st); return {ok:true}; }
     case "adminAddLesson": (st.lessons=st.lessons||[]).push(Object.assign({id:"l"+Date.now(), img:"", show:p.show}, p.lesson)); lsSet("cu_demo",st); return {ok:true};
     case "adminSetChallenge": st.challenge=Object.assign({id:"c"+Date.now()}, p.challenge); lsSet("cu_demo",st); return {ok:true};
     case "adminQuestions": { st.seedQ = st.seedQ || {answer:"",public:false};
@@ -778,11 +781,13 @@ function viewRecipe(id){
       <div class="pbtns">
         <button class="btn" id="cp">${I.copy}Копіювати</button>
         <button class="btn ghost" id="fv">${fav?"✓ У моєму журналі":"До мого журналу"}</button>
+        ${isAdmin()?'<button class="btn ghost" id="edr" style="grid-column:1/-1">✏️ Редагувати рецепт</button>':""}
       </div>
       ${r.tip?`<div class="tip">${I.bulb}<span>${esc(r.tip)}</span></div>`:""}
     </div>
   </div>
   <div class="steps3"><div><i>1.</i>Оберіть тему</div><span class="bar"></span><div><i>2.</i>Скопіюйте промпт</div><span class="bar"></span><div><i>3.</i>Створіть матеріал</div></div>`;
+  if($("#edr")) $("#edr").onclick = () => { EDIT_RECIPE=r.id; ATAB="recipe"; go("admin"); };
   $("#cp").onclick = async () => { const ok = await copyText(r.prompt); toast(ok?"Промпт скопійовано":"Не вдалося скопіювати — виділіть текст вручну"); };
   $("#fv").onclick = () => {
     const p=P(); const i=p.fav.indexOf(r.id);
@@ -1107,7 +1112,7 @@ async function adminSend(btn, action, payload, okMsg, after){
 }
 function viewAdmin(){
   if(!isAdmin()){ viewHome(); return; }
-  const T=[["recipe","Новий рецепт"],["lesson","Новий урок"],["challenge","Челендж"],["questions","Запитання"],["works","Роботи"]];
+  const T=[["recipe","Рецепти"],["lesson","Новий урок"],["challenge","Челендж"],["questions","Запитання"],["works","Роботи"]];
   app.innerHTML = crumbs(["Головна","home"],["Кабінет авторки"]) + ptitle("Кабінет авторки","Додавайте матеріали й відповідайте учасницям просто з телефона") + `
   <div class="tabs">${T.map(t=>`<button data-a="${t[0]}">${t[1]}</button>`).join("")}</div>
   <div id="abody"></div>`;
@@ -1119,9 +1124,17 @@ function drawA(){
   const box=$("#abody");
   ({recipe:aRecipe,lesson:aLesson,challenge:aChallenge,questions:aQuestions,works:aWorks})[ATAB](box);
 }
-function aRecipe(box){
+let EDIT_RECIPE = "";
+async function aRecipe(box){
   const R=DATA.recipes, vals=k=>R.map(r=>r[k]);
+  box.innerHTML='<div class="load"><div class="spin"></div></div>';
+  let ALL=[]; try{ const r=await api("adminRecipes"); ALL=r.items||[]; }catch(err){ if(err.message==="auth") return; }
+  const cur = ALL.find(r=>String(r.id)===String(EDIT_RECIPE)) || null;
+  if(!cur) EDIT_RECIPE="";
   box.innerHTML = `<div class="form">
+    <div class="editpick"><label class="lbl" for="ar_pick">Редагувати рецепт</label>
+      <select class="sel" id="ar_pick"><option value="">+ Новий рецепт</option>${ALL.map(r=>`<option value="${esc(r.id)}" ${cur&&String(cur.id)===String(r.id)?"selected":""}>${esc(r.title)}${r.show?"":" (схований)"}${r.img?"":" — без фото"}</option>`).join("")}</select></div>
+    ${cur?`<div class="note">Ви редагуєте рецепт «${esc(cur.title)}». Змініть потрібне і натисніть «Зберегти зміни».</div>`:""}
     ${fld("ar_title","Назва рецепта *",'<input class="fi" id="ar_title" maxlength="80" placeholder="Наприклад: Розмальовка до теми уроку">')}
     ${fld("ar_desc","Короткий опис",'<input class="fi" id="ar_desc" maxlength="140" placeholder="Одне речення: що це за матеріал">')}
     <div class="two">
@@ -1133,16 +1146,20 @@ function aRecipe(box){
     ${fld("ar_count","Скільки виходить",'<input class="fi" id="ar_count" maxlength="30" placeholder="4 картки, 1 аркуш, 10 запитань">')}
     ${fld("ar_prompt","Промпт *",'<textarea class="ta" id="ar_prompt" maxlength="20000" placeholder="Вставте сюди промпт"></textarea>')}
     ${fld("ar_tip","Порада",'<input class="fi" id="ar_tip" maxlength="140" placeholder="Змініть тему під свій урок">')}
-    <div><label class="lbl">Фото результату</label><div class="drop" id="ar_drop">Натисніть, щоб обрати фото з галереї</div><input type="file" id="ar_file" accept="image/*" class="hidden"></div>
-    <label class="chk"><input type="checkbox" id="ar_show" checked> Одразу показати учасницям</label>
-    <div><button class="btn" type="button" id="ar_send">Додати рецепт</button></div>
+    <div><label class="lbl">Фото результату</label><div class="drop" id="ar_drop">${cur&&cur.img?`<img src="${esc(cur.img)}" alt="Поточне фото">Натисніть, щоб замінити фото`:"Натисніть, щоб обрати фото з галереї"}</div><input type="file" id="ar_file" accept="image/*" class="hidden"></div>
+    <label class="chk"><input type="checkbox" id="ar_show" ${!cur||cur.show?"checked":""}> ${cur?"Показувати учасницям":"Одразу показати учасницям"}</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="ar_send">${cur?"Зберегти зміни":"Додати рецепт"}</button>${cur?'<button class="btn ghost" type="button" id="ar_new">Скасувати</button>':""}</div>
   </div>`;
+  if(cur){ [["ar_title","title"],["ar_desc","desc"],["ar_subject","subject"],["ar_grade","grade"],["ar_type","type"],["ar_platform","platform"],["ar_count","count"],["ar_prompt","prompt"],["ar_tip","tip"]].forEach(([id,k])=>{ $("#"+id).value=cur[k]||""; }); }
+  $("#ar_pick").onchange = e => { EDIT_RECIPE=e.target.value; aRecipe(box); };
+  if($("#ar_new")) $("#ar_new").onclick = () => { EDIT_RECIPE=""; aRecipe(box); };
   let photo=""; pickImage($("#ar_drop"), $("#ar_file"), d=>photo=d);
   $("#ar_send").onclick = () => {
     const v=id=>$("#"+id).value.trim();
     const recipe={title:v("ar_title"),desc:v("ar_desc"),subject:v("ar_subject"),grade:v("ar_grade"),type:v("ar_type"),platform:v("ar_platform"),count:v("ar_count"),prompt:v("ar_prompt"),tip:v("ar_tip")};
     if(!recipe.title || !recipe.prompt){ toast("Заповніть назву і промпт"); return; }
-    adminSend($("#ar_send"),"adminAddRecipe",{recipe,photo,show:$("#ar_show").checked},"Рецепт додано!",()=>aRecipe(box));
+    if(cur) adminSend($("#ar_send"),"adminUpdateRecipe",{id:cur.id,recipe,photo,show:$("#ar_show").checked},"Зміни збережено!",()=>aRecipe(box));
+    else adminSend($("#ar_send"),"adminAddRecipe",{recipe,photo,show:$("#ar_show").checked},"Рецепт додано!",()=>aRecipe(box));
   };
 }
 function aLesson(box){
