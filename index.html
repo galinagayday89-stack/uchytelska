@@ -263,6 +263,11 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .ocard[data-go]{cursor:pointer}
 .wtag{display:inline-block;background:#E3EFFD;color:var(--blue);font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;align-self:flex-start}
 .win-tag{background:linear-gradient(180deg,#FFD84A,#F5B800);color:var(--navy);font-weight:800;font-size:12px;border-radius:999px;padding:3px 10px;align-self:flex-start}
+.wkind{display:flex;flex-direction:column;gap:8px}
+.wkind label{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--line);border-radius:14px;padding:10px 14px;cursor:pointer;font-weight:600}
+.wkind label:has(input:checked){border-color:var(--blue);background:#F5F9FF}
+.wkind input{margin-top:5px;accent-color:var(--blue)}
+.wkind small{color:var(--muted);font-weight:600}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -1072,12 +1077,17 @@ function viewBoard(){
   if($("#addCh")) $("#addCh").onclick=()=>workForm(true);
   drawG();
 }
+function inCurrentChallenge(w){
+  const ch=DATA.challenge; if(!ch||!w.challenge) return false;
+  if(w.chId) return w.chId===ch.id;
+  const m=/^c(\d{12,})$/.exec(ch.id||""); return !m || !w.date || new Date(w.date+"T23:59:59") >= new Date(+m[1]);
+}
 async function drawG(){
   app.querySelectorAll("[data-g]").forEach(b=>b.classList.toggle("on", b.dataset.g===GF));
   const box=$("#gbody"); box.innerHTML='<div class="load"><div class="spin"></div></div>';
   try{
     const r = await api(GF==="mine"?"myWorks":"gallery");
-    let items = r.items||[]; if(GF==="ch") items=items.filter(w=>w.challenge);
+    let items = r.items||[]; if(GF==="ch") items=items.filter(inCurrentChallenge);
     const liked = P().likes;
     box.innerHTML = items.length ? `<div class="gal">${items.map(w=>`<div class="gi">
       <div class="th" data-zoom="${esc(w.photo)}">${w.photo?`<img src="${esc(w.photo)}" alt="${esc(w.title)}" loading="lazy">`:'<div class="ph">Робота</div>'}</div>
@@ -1111,15 +1121,22 @@ function workForm(forCh, forLesson){
       <div><label class="lbl" for="wt">Назва</label><input class="fi" id="wt" maxlength="80" placeholder="Наприклад: Картки «Зимові птахи»"></div>
       <div><label class="lbl" for="wd">Кілька слів про роботу</label><textarea class="ta" id="wd" maxlength="400" style="min-height:90px" placeholder="Для якого класу, яким сервісом зроблено"></textarea></div>
       <div><label class="lbl">Фото роботи</label><div class="drop" id="wdrop">Натисніть, щоб обрати зображення</div><input type="file" id="wfile" accept="image/*" class="hidden"></div>
-      ${ch?`<label style="display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer"><input type="checkbox" id="wch" ${forCh?"checked":""} style="width:20px;height:20px;accent-color:var(--blue)"> Беру участь у челенджі «${esc(ch.desc)}»</label>`:""}
-      ${LS.length?`<div><label class="lbl" for="wl">Це практичне завдання до уроку?</label><select class="sel" id="wl"><option value="">Ні, просто моя робота</option>${LS.map(l=>`<option ${forLesson===l.title?"selected":""}>${esc(l.title)}</option>`).join("")}</select></div>`:""}
-      <div class="note">Робота з'явиться на дошці після перевірки. Бали: практичне завдання +10, челендж +15.</div>
+      <div><label class="lbl">Що це за робота?</label><div class="wkind">
+        ${ch?`<label><input type="radio" name="wk" value="ch" ${forCh?"checked":""}><span><b>Челендж тижня</b> · +15 балів<br><small>${esc(ch.desc)}</small></span></label>`:""}
+        ${LS.length?`<label><input type="radio" name="wk" value="lesson" ${forLesson?"checked":""}><span><b>Практичне завдання до уроку</b> · +10 балів</span></label>
+          <select class="sel ${forLesson?"":"hidden"}" id="wl"><option value="">Оберіть урок…</option>${LS.map(l=>`<option ${forLesson===l.title?"selected":""}>${esc(l.title)}</option>`).join("")}</select>`:""}
+        <label><input type="radio" name="wk" value="free" ${!forCh&&!forLesson?"checked":""}><span><b>Просто моя робота</b><br><small>щоб поділитися з колегами</small></span></label>
+      </div></div>
+      <div class="note">Робота з'явиться на дошці після перевірки.</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="wsend">Надіслати</button><button type="button" class="btn ghost" data-close>Скасувати</button></div>
     </div>`);
   let photo="";
   pickImage($("#wdrop"), $("#wfile"), d=>photo=d);
+  m.querySelectorAll("[name=wk]").forEach(r=>r.onchange=()=>{ const s=$("#wl"); if(s) s.classList.toggle("hidden", m.querySelector("[name=wk]:checked").value!=="lesson"); });
   $("#wsend").onclick = async () => {
-    const title=$("#wt").value.trim(), desc=$("#wd").value.trim(), challenge=!!($("#wch")&&$("#wch").checked), lesson=$("#wl")?$("#wl").value:"";
+    const kind=(m.querySelector("[name=wk]:checked")||{}).value||"free";
+    const title=$("#wt").value.trim(), desc=$("#wd").value.trim(), challenge=kind==="ch", lesson=kind==="lesson"&&$("#wl")?$("#wl").value:"";
+    if(kind==="lesson" && !lesson){ toast("Оберіть урок, до якого це завдання"); return; }
     if(!title){ toast("Вкажіть назву роботи"); return; }
     if(!photo){ toast("Додайте фото роботи"); return; }
     const b=$("#wsend"); b.disabled=true; b.textContent="Надсилаю…";
