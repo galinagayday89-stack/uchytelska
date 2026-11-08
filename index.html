@@ -268,6 +268,7 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .wkind label:has(input:checked){border-color:var(--blue);background:#F5F9FF}
 .wkind input{margin-top:5px;accent-color:var(--blue)}
 .wkind small{color:var(--muted);font-weight:600}
+.hid-tag{background:#EEE;color:#555;font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;align-self:flex-start}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -606,8 +607,8 @@ async function demoApi(action, p){
       if(["DEMO","ДЕМО"].includes(String(p.code||"").trim().toUpperCase())) return {ok:true, name:"Галина", validTo:"", role:"admin"};
       return {ok:false, message:"Код не знайдено. У демо-режимі введіть DEMO."};
     case "data": return Object.assign({ok:true}, DEMO_DATA, {
-      recipes:[...(st.recipes||[]).filter(r=>r.show), ...DEMO_DATA.recipes],
-      lessons:[...DEMO_DATA.lessons, ...(st.lessons||[]).filter(l=>l.show)],
+      recipes:[...(st.recipes||[]).map(r=>Object.assign({},r,{hidden:!r.show})), ...DEMO_DATA.recipes],
+      lessons:[...DEMO_DATA.lessons, ...(st.lessons||[]).map(l=>Object.assign({},l,{hidden:!l.show}))],
       challenge: st.challenge || DEMO_DATA.challenge, role:"admin"});
     case "adminAddRecipe": (st.recipes=st.recipes||[]).unshift(Object.assign({id:"r"+Date.now(), img:p.photo||"", show:p.show}, p.recipe)); lsSet("cu_demo",st); return {ok:true};
     case "adminOverview": return {ok:true, questionsWaiting:(st.questions||[]).filter(q=>!q.answer).length+1, worksWaiting:(st.works||[]).filter(w=>!w.approved&&!w.rejected).length+(st.seedW?0:1), recipes:DEMO_DATA.recipes.length+(st.recipes||[]).length, challengeWorks:1,
@@ -814,8 +815,9 @@ function viewRecipes(){
   draw();
 }
 const thumb = (src, label, alt) => src ? `<img src="${esc(src)}" alt="${esc(alt||label)}" loading="lazy">` : `<div class="ph ${alt?"alt":""}">${esc(label)}</div>`;
+const HID='<span class="hid-tag">Схований — бачите лише ви</span>';
 const rcard = r => `<article class="rc" data-go="recipe-${esc(r.id)}"><div class="th">${thumb(r.img, r.type||r.title)}</div>
-  <div class="bd"><h3>${esc(r.title)}</h3><p>${esc(r.desc)}</p><div class="mini">${[r.grade,r.subject,r.platform].filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join("")}</div></div></article>`;
+  <div class="bd">${r.hidden?HID:""}<h3>${esc(r.title)}</h3><p>${esc(r.desc)}</p><div class="mini">${[r.grade,r.subject,r.platform].filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join("")}</div></div></article>`;
 
 function viewRecipe(id){
   const r = DATA.recipes.find(x=>String(x.id)===String(id));
@@ -862,13 +864,13 @@ function viewLessons(){
   <div class="grid3">${L.length?L.map((l,i)=>{
     const done = (p.lessons[l.id]||[]).length, all=(l.steps||[]).length;
     return `<article class="rc" data-go="lesson-${esc(l.id)}"><div class="th">${l.img?thumb(l.img,l.title):`<img src="${IMG.pencils}" alt="" style="object-fit:contain;padding:14px">`}</div>
-    <div class="bd"><h3>${esc(l.title)}</h3><p>${esc(l.desc)}</p><div class="mini"><span>${esc(l.platform||"")}</span><span>${all} ${plural(all,"крок","кроки","кроків")}</span>${done?`<span>пройдено ${done}/${all}</span>`:""}</div></div></article>`;}).join(""):`<div class="empty">Уроки скоро з'являться.</div>`}</div>`;
+    <div class="bd">${l.hidden?HID:""}<h3>${esc(l.title)}</h3><p>${esc(l.desc)}</p><div class="mini"><span>${esc(l.platform||"")}</span><span>${all} ${plural(all,"крок","кроки","кроків")}</span>${done?`<span>пройдено ${done}/${all}</span>`:""}</div></div></article>`;}).join(""):`<div class="empty">Уроки скоро з'являться.</div>`}</div>`;
 }
 function viewLesson(id){
   const l = DATA.lessons.find(x=>String(x.id)===String(id));
   if(!l){ app.innerHTML=`<div class="empty">Урок не знайдено.</div>`; return; }
   const p=P(); const done = p.lessons[l.id]||[];
-  app.innerHTML = crumbs(["Уроки з практикою","lessons"],[l.title]) + ptitle(l.title, l.desc) + `
+  app.innerHTML = crumbs(["Уроки з практикою","lessons"],[l.title]) + ptitle(l.title, l.desc) + (l.hidden?'<div class="note" style="margin:-10px 0 18px">Урок схований: так його побачать учасниці, коли ви ввімкнете «Показувати учасницям».</div>':"") + `
   <div class="chips" style="margin:-10px 0 20px">${l.platform?`<span class="chip c4">${I.spark}${esc(l.platform)}</span>`:""}
     ${l.video?`<a class="btn sm" href="${esc(l.video)}" target="_blank" rel="noopener">Дивитися відео</a>`:""}</div>
   <div class="lsteps">${(l.steps||[]).map((s,i)=>`<div class="lstep"><div style="min-width:0;flex:1"><h3>${esc(s[0])}</h3><p>${nl(s[1]||"")}</p>
