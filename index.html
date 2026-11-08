@@ -269,6 +269,8 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .wkind input{margin-top:5px;accent-color:var(--blue)}
 .wkind small{color:var(--muted);font-weight:600}
 .hid-tag{background:#EEE;color:#555;font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;align-self:flex-start}
+.btn.del{color:var(--err);border-color:var(--err)}
+.btn.del:hover{background:#FDECEA}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -613,6 +615,7 @@ async function demoApi(action, p){
     case "adminAddRecipe": (st.recipes=st.recipes||[]).unshift(Object.assign({id:"r"+Date.now(), img:p.photo||"", show:p.show}, p.recipe)); lsSet("cu_demo",st); return {ok:true};
     case "adminOverview": return {ok:true, questionsWaiting:(st.questions||[]).filter(q=>!q.answer).length+1, worksWaiting:(st.works||[]).filter(w=>!w.approved&&!w.rejected).length+(st.seedW?0:1), recipes:DEMO_DATA.recipes.length+(st.recipes||[]).length, challengeWorks:1,
       members:[{name:"Галина Гайдай",code:"DEMO",validTo:"",active:true,admin:true,lastLogin:new Date().toISOString().slice(0,10)},{name:"Олена Петренко",code:"UCH-HEBM8",validTo:"2026-12-08",active:true,lastLogin:"2026-11-07"},{name:"Ірина Коваль",code:"UCH-M3HVT",validTo:"2026-11-10",active:true,lastLogin:""},{name:"Наталія Мельник",code:"UCH-TC2AB",validTo:"2026-11-01",active:true,lastLogin:"2026-10-30"}]};
+    case "adminDelete": { const k=p.kind==="lesson"?"lessons":"recipes"; st[k]=(st[k]||[]).filter(x=>x.id!==p.id); lsSet("cu_demo",st); return {ok:true}; }
     case "adminLessons": return {ok:true, items:[...DEMO_DATA.lessons.map(l=>Object.assign({show:true},l)), ...(st.lessons||[])]};
     case "adminUpdateLesson": { const l=(st.lessons||[]).find(x=>x.id===p.id); if(!l) return {ok:false,message:"Приклади з демо не редагуються — додайте свій урок"}; Object.assign(l,p.lesson,{show:p.show}); lsSet("cu_demo",st); return {ok:true}; }
     case "adminRecipes": return {ok:true, items:[...(st.recipes||[]), ...DEMO_DATA.recipes.map(r=>Object.assign({show:true},r))]};
@@ -1298,11 +1301,13 @@ async function aRecipe(box){
     ${fld("ar_tip","Порада",'<input class="fi" id="ar_tip" maxlength="140" placeholder="Змініть тему під свій урок">')}
     <div><label class="lbl">Фото результату</label><div class="drop" id="ar_drop">${cur&&cur.img?`<img src="${esc(cur.img)}" alt="Поточне фото">Натисніть, щоб замінити фото`:"Натисніть, щоб обрати фото з галереї"}</div><input type="file" id="ar_file" accept="image/*" class="hidden"></div>
     <label class="chk"><input type="checkbox" id="ar_show" ${!cur||cur.show?"checked":""}> ${cur?"Показувати учасницям":"Одразу показати учасницям"}</label>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="ar_send">${cur?"Зберегти зміни":"Додати рецепт"}</button>${cur?'<button class="btn ghost" type="button" id="ar_new">Скасувати</button>':""}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="ar_send">${cur?"Зберегти зміни":"Додати рецепт"}</button>${cur?'<button class="btn ghost" type="button" id="ar_new">Скасувати</button><button class="btn ghost del" type="button" id="ar_del">🗑 Видалити рецепт</button>':""}</div>
   </div>`;
   if(cur){ [["ar_title","title"],["ar_desc","desc"],["ar_subject","subject"],["ar_grade","grade"],["ar_type","type"],["ar_platform","platform"],["ar_count","count"],["ar_prompt","prompt"],["ar_tip","tip"]].forEach(([id,k])=>{ $("#"+id).value=cur[k]||""; }); }
   $("#ar_pick").onchange = e => { EDIT_RECIPE=e.target.value; aRecipe(box); };
   if($("#ar_new")) $("#ar_new").onclick = () => { EDIT_RECIPE=""; aRecipe(box); };
+  if($("#ar_del")) $("#ar_del").onclick = e => { const b=e.currentTarget; if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, видалити назавжди"; return; }
+    adminSend(b,"adminDelete",{kind:"recipe",id:cur.id},"Рецепт видалено",()=>{ EDIT_RECIPE=""; aRecipe(box); }); };
   let photo=""; pickImage($("#ar_drop"), $("#ar_file"), d=>photo=d);
   $("#ar_send").onclick = () => {
     const v=id=>$("#"+id).value.trim();
@@ -1346,19 +1351,22 @@ function aImport(box){
     try{ const j=JSON.parse(await f.text());
       const rs=(Array.isArray(j)?j:(j.recipes||[])).filter(r=>r&&r.title&&r.prompt).map(r=>Object.assign({kind:"recipe"},r));
       const ls=(Array.isArray(j)?[]:(j.lessons||[])).filter(l=>l&&l.title&&Array.isArray(l.steps)).map(l=>Object.assign({kind:"lesson",prompt:l.desc||""},l));
-      items=[...ls,...rs]; }
+      items=[...ls,...rs];
+      const have=new Set([...(DATA.lessons||[]).map(x=>"lesson|"+String(x.title).trim().toLowerCase()), ...(DATA.recipes||[]).map(x=>"recipe|"+String(x.title).trim().toLowerCase())]);
+      items.forEach(x=>x.exists=have.has(x.kind+"|"+String(x.title).trim().toLowerCase())); }
     catch(e){ toast("Не вдалося прочитати файл. Потрібен файл .json від Claude"); return; }
     if(!items.length){ toast("У файлі немає рецептів чи уроків"); return; }
     const nr=items.filter(x=>x.kind==="recipe").length, nl2=items.length-nr;
     $("#im_drop").textContent=f.name+" · "+[nl2?"уроків: "+nl2:"",nr?"рецептів: "+nr:""].filter(Boolean).join(", ")+" (натисніть, щоб обрати інший)";
     $("#im_list").innerHTML=`<label class="chk" style="margin-bottom:10px"><input type="checkbox" id="im_all" checked> Обрати всі</label>
-      <div class="qa">${items.map((r,i)=>`<label class="qi chk" style="align-items:flex-start;gap:14px"><input type="checkbox" data-i="${i}" checked style="margin-top:4px">
+      <div class="qa">${items.map((r,i)=>`<label class="qi chk" style="align-items:flex-start;gap:14px"><input type="checkbox" data-i="${i}" ${r.exists?"":"checked"} style="margin-top:4px">
         ${r.photo?`<img src="${esc(r.photo)}" alt="" style="width:84px;height:84px;object-fit:contain;margin:0;border-radius:10px;background:#F3F6FB;flex:none">`:""}
-        <span style="min-width:0"><span class="badge b-type">${r.kind==="lesson"?"Урок · "+r.steps.length+" "+plural(r.steps.length,"крок","кроки","кроків"):"Рецепт"}</span><br><b style="font-family:var(--disp);color:var(--navy);font-size:17px">${esc(r.title)}</b><br><span style="font-weight:600;color:var(--muted);font-size:14px">${esc([r.type,r.subject,r.grade,r.platform].filter(Boolean).join(" · "))}</span>
+        <span style="min-width:0">${r.exists?'<span class="badge b-wait">вже є на сайті</span> ':""}<span class="badge b-type">${r.kind==="lesson"?"Урок · "+r.steps.length+" "+plural(r.steps.length,"крок","кроки","кроків"):"Рецепт"}</span><br><b style="font-family:var(--disp);color:var(--navy);font-size:17px">${esc(r.title)}</b><br><span style="font-weight:600;color:var(--muted);font-size:14px">${esc([r.type,r.subject,r.grade,r.platform].filter(Boolean).join(" · "))}</span>
         <span style="display:block;font-weight:400;font-size:14px;margin-top:4px">${esc(String(r.prompt).slice(0,160))}${String(r.prompt).length>160?"…":""}</span></span></label>`).join("")}</div>
       <label class="chk" style="margin:14px 0"><input type="checkbox" id="im_show" checked> Одразу показати учасницям</label>
       <button class="btn" type="button" id="im_go">Додати обрані</button><div id="im_prog" class="note hidden" style="margin-top:12px"></div>`;
-    $("#im_all").onchange=e=>box.querySelectorAll("[data-i]").forEach(c=>c.checked=e.target.checked);
+    $("#im_all").checked=!items.some(x=>x.exists);
+    $("#im_all").onchange=e=>box.querySelectorAll("[data-i]").forEach(c=>c.checked=e.target.checked&&!items[+c.dataset.i].exists);
     $("#im_go").onclick=async()=>{
       const pick=[...box.querySelectorAll("[data-i]:checked")].map(c=>items[+c.dataset.i]);
       if(!pick.length){ toast("Оберіть хоча б один пункт"); return; }
@@ -1383,7 +1391,8 @@ async function aLesson(box){
   box.innerHTML = `<div class="form">
     <div class="editpick"><label class="lbl" for="al_pick">Редагувати урок</label>
       <select class="sel" id="al_pick"><option value="">+ Новий урок</option>${ALL.map(x=>`<option value="${esc(x.id)}" ${cur&&String(cur.id)===String(x.id)?"selected":""}>${esc(x.title)}${x.show?"":" (схований)"}</option>`).join("")}</select></div>
-    ${cur?`<div class="note">Ви редагуєте урок «${esc(cur.title)}». Змініть потрібне і натисніть «Зберегти зміни».</div>`:""}
+    ${cur?`<div class="note">Ви редагуєте урок «${esc(cur.title)}». Змініть потрібне і натисніть «Зберегти зміни».</div>
+      <div><button class="btn gold pill" type="button" id="al_view">👁 Переглянути урок, як учасниця</button></div>`:""}
     ${fld("al_title","Назва уроку *",'<input class="fi" id="al_title" maxlength="90" placeholder="Наприклад: Гра-вікторина зі ШІ за 10 хвилин">')}
     ${fld("al_desc","Короткий опис",'<input class="fi" id="al_desc" maxlength="140" placeholder="Чого навчиться учасниця">')}
     <div class="two">
@@ -1393,19 +1402,25 @@ async function aLesson(box){
     <div><label class="lbl">Кроки *</label><div id="al_steps" class="srows"></div>
       <button type="button" class="btn ghost sm" id="al_add" style="margin-top:10px">+ Додати крок</button></div>
     <label class="chk"><input type="checkbox" id="al_show" ${!cur||cur.show?"checked":""}> ${cur?"Показувати учасницям":"Одразу показати учасницям"}</label>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="al_send">${cur?"Зберегти зміни":"Додати урок"}</button>${cur?'<button class="btn ghost" type="button" id="al_new">Скасувати</button>':""}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="al_send">${cur?"Зберегти зміни":"Додати урок"}</button>${cur?'<button class="btn ghost" type="button" id="al_new">Скасувати</button><button class="btn ghost del" type="button" id="al_del">🗑 Видалити урок</button>':""}</div>
   </div>`;
   const add = (st) => { st=st||["","",""]; const n=$("#al_steps").children.length+1; const d=document.createElement("div"); d.className="srow";
     d.innerHTML=`<b>${n}</b><div><input class="fi" placeholder="Назва кроку" maxlength="80"><textarea class="ta s-d" style="min-height:70px;margin-top:8px" placeholder="Що зробити" maxlength="1500"></textarea>
       <textarea class="ta s-p" style="min-height:60px;margin-top:8px;background:var(--sky)" placeholder="Промпт для цього кроку (необов'язково) — учасниці побачать його з кнопкою «Копіювати»" maxlength="20000"></textarea>
+      <button type="button" class="btn ghost sm s-cp" style="margin-top:6px">${I.copy}Копіювати промпт</button>
       <div class="drop s-drop" style="margin-top:8px;padding:12px">${st[3]?`<img src="${esc(st[3])}" alt="">Натисніть, щоб замінити скриншот`:"+ Скриншот до кроку (необов'язково)"}</div><input type="file" accept="image/*" class="hidden s-file">
       ${st[3]?'<label class="chk" style="margin-top:6px;font-size:14px"><input type="checkbox" class="s-del"> Прибрати скриншот</label>':""}</div>`;
     $("#al_steps").appendChild(d); d.querySelector("input").value=st[0]||""; d.querySelector(".s-d").value=st[1]||""; d.querySelector(".s-p").value=st[2]||"";
+    const cpb=d.querySelector(".s-cp"), pta=d.querySelector(".s-p"); const upd=()=>cpb.classList.toggle("hidden",!pta.value.trim()); upd(); pta.oninput=upd;
+    cpb.onclick=async()=>{ const ok=await copyText(pta.value); toast(ok?"Промпт скопійовано":"Не вдалося скопіювати"); };
     d.dataset.img=st[3]||""; pickImage(d.querySelector(".s-drop"), d.querySelector(".s-file"), u=>{ d.dataset.img=u; }); };
   if(cur){ $("#al_title").value=cur.title||""; $("#al_desc").value=cur.desc||""; $("#al_platform").value=cur.platform||""; $("#al_video").value=cur.video||""; (cur.steps||[]).forEach(add); }
   else { add(); add(); add(); }
   $("#al_add").onclick = () => add();
   $("#al_pick").onchange = e => { EDIT_LESSON=e.target.value; aLesson(box); };
+  if($("#al_view")) $("#al_view").onclick = () => go("lesson-"+cur.id);
+  if($("#al_del")) $("#al_del").onclick = e => { const b=e.currentTarget; if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, видалити назавжди"; return; }
+    adminSend(b,"adminDelete",{kind:"lesson",id:cur.id},"Урок видалено",()=>{ EDIT_LESSON=""; aLesson(box); }); };
   if($("#al_new")) $("#al_new").onclick = () => { EDIT_LESSON=""; aLesson(box); };
   $("#al_send").onclick = () => {
     const v=id=>$("#"+id).value.trim();
