@@ -386,6 +386,11 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .wk-note{display:block;margin-top:4px;color:var(--muted)}
 .wkind label.done{opacity:.75;cursor:default}
 .wkind label.done .wk-note{color:#1E7A45;font-weight:700}
+.wlink{align-self:flex-start;text-decoration:none;margin:2px 0 4px}
+.w-hid{background:#E3EFFD;color:var(--blue)}
+.b-no{background:#ECEEF3;color:#5B6480}
+.wshow{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--navy);margin:4px 0 2px;cursor:pointer}
+.wshow input{width:18px;height:18px;accent-color:var(--blue)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -746,12 +751,15 @@ async function demoApi(action, p){
         {row:"s0", name:"Олена Петренко", date:"2026-11-04", type:"Потрібен промпт", text:"Як зробити гру-вікторину для 3 класу за допомогою ШІ?", prompt:"", photo:"", answer:st.seedQ.answer, public:st.seedQ.public}]}; }
     case "adminAnswer": if(p.row==="s0") st.seedQ={answer:p.answer,public:p.public}; else { const q=st.questions[+String(p.row).slice(1)]; if(q){ q.answer=p.answer; q.public=p.public; } } lsSet("cu_demo",st); return {ok:true};
     case "adminWorks": { st.seedW = st.seedW || "";
-      const seed=st.seedW==="del"?[]:[{id:"s1", name:"Ірина Коваль", date:"2026-11-05", title:"Картки «Зимові птахи»", desc:"Для уроку ЯДС, 2 клас", photo:IMG.recipeDemo, challenge:true, approved:st.seedW==="ok", rejected:st.seedW==="no"}];
-      const all=[...st.works, ...seed].map(w=>Object.assign({},w,{status:w.approved?"ok":w.rejected?"no":"new"}));
-      const counts={new:0,ok:0,no:0,all:all.length}; all.forEach(w=>counts[w.status]++);
-      return {ok:true, counts, items:all.filter(w=>p.status==="all"||w.status===(p.status||"new"))}; }
+      const seed=st.seedW==="del"?[]:[{id:"s1", name:"Ірина Коваль", date:"2026-11-05", title:"Картки «Зимові птахи»", desc:"Для уроку ЯДС, 2 клас", photo:IMG.recipeDemo, challenge:true, state:st.seedW||"new"}];
+      const all=[...st.works, ...seed].map(w=>Object.assign({},w,{status:w.state||(w.approved?"ok":w.rejected?"no":"new")}));
+      const counts={new:0,ok:0,off:0,all:all.length}; all.forEach(w=>{ if(w.status==="new"||w.status==="ok") counts[w.status]++; else counts.off++; });
+      const want=p.status||"new";
+      return {ok:true, counts, items:all.filter(w=>want==="all"||w.status===want||(want==="off"&&(w.status==="no"||w.status==="hid")))}; }
     case "adminDeleteWork": if(p.id==="s1") st.seedW="del"; else st.works=st.works.filter(w=>w.id!==p.id); st.pts=(st.pts||[]).filter(x=>!x.key.endsWith(":"+p.id)); lsSet("cu_demo",st); return {ok:true};
-    case "adminApprove": if(p.id==="s1") st.seedW=p.approve?"ok":"no"; else { const w=st.works.find(x=>x.id===p.id); if(w){ if(p.approve){ w.approved=true; w.rejected=false; if(w.challenge) demoPts(st,"Робота на челендж: "+w.title,15,"c:"+w.id); else if(w.lesson) demoPts(st,"Практичне завдання: "+w.lesson,10,"p:"+w.id); } else { w.rejected=true; w.approved=false; } } } lsSet("cu_demo",st); return {ok:true};
+    case "adminApprove": { const state=p.state||(p.approve?"show":"reject"); const ST={show:"ok",hide:"hid",reject:"no"}[state];
+      if(p.id==="s1") st.seedW=ST; else { const w=st.works.find(x=>x.id===p.id); if(w){ w.state=ST; w.approved=ST==="ok"; w.rejected=ST==="no"; if(ST!=="no"){ if(w.challenge) demoPts(st,"Робота на челендж: "+w.title,15,"c:"+w.id); else if(w.lesson) demoPts(st,"Практичне завдання: "+w.lesson,10,"p:"+w.id); } } }
+      lsSet("cu_demo",st); return {ok:true}; }
     case "adminWinner": { const w=st.works.find(x=>x.id===p.id); if(w){ w.winner=true; demoPts(st,"Переможниця челенджу: "+w.title,20,"w:"+w.id); } else (st.winners=st.winners||[]).push(p.id); lsSet("cu_demo",st); return {ok:true}; }
     case "progress": demoPts(st, p.kind==="lesson"?"Урок пройдено":"Тренажер пройдено", 5, p.kind+":"+p.id); lsSet("cu_demo",st); return {ok:true};
     case "rating": case "adminRating": { const mine=(st.pts||[]).reduce((a,x)=>a+x.points,0); const ym=new Date().toISOString().slice(0,7);
@@ -763,9 +771,9 @@ async function demoApi(action, p){
     case "publicAnswers": return {ok:true, items:[
       {date:"2026-11-03",type:"Потрібен промпт",text:"Як зробити, щоб ШІ писав без помилок українською на картинках?",answer:"Пишіть усі написи в лапках, обмежуйтеся 2–5 словами на зображенні й додавайте: «усі написи українською, без помилок». Довгі тексти краще додавати потім у Canva."},
       {date:"2026-11-01",type:"Питання про платформу",text:"Чим відрізняється Gemini від ChatGPT для картинок?",answer:"Обидва створюють зображення. Пробуйте один промпт в обох і порівнюйте — для різних стилів краще працюють різні сервіси."}]};
-    case "submitWork": st.works.unshift({id:"w"+Date.now(), date:new Date().toISOString(), name:"Галина", title:p.title, desc:p.desc, photo:p.photo, challenge:p.challenge, lesson:p.lesson||"", approved:false, likes:0}); lsSet("cu_demo",st); return {ok:true};
+    case "submitWork": st.works.unshift({id:"w"+Date.now(), date:new Date().toISOString(), name:"Галина", title:p.title, desc:p.desc, photo:p.photo, challenge:p.challenge, lesson:p.lesson||"", link:p.link||"", approved:false, likes:0}); lsSet("cu_demo",st); return {ok:true};
     case "gallery": return {ok:true, items:[
-      {id:"g1",name:"Олена",title:"Картки «Природа восени»",desc:"Для уроку ЯДС у 2 класі",photo:IMG.recipeDemo,challenge:true,winner:(st.winners||[]).includes("g1"),likes:(st.likes.g1||0)+12},
+      {id:"g1",name:"Олена",title:"Картки «Природа восени»",desc:"Для уроку ЯДС у 2 класі",photo:IMG.recipeDemo,link:"https://wordwall.net",challenge:true,winner:(st.winners||[]).includes("g1"),likes:(st.likes.g1||0)+12},
       {id:"g2",name:"Наталія",title:"Мій робочий стіл",desc:"Готуюся до уроку з новими картками",photo:IMG.hero,challenge:false,likes:(st.likes.g2||0)+7},
       ...(st.seedW==="ok"?[{id:"s1",name:"Ірина",title:"Картки «Зимові птахи»",desc:"Для уроку ЯДС, 2 клас",photo:IMG.recipeDemo,challenge:true,likes:st.likes.s1||0}]:[]),
       ...st.works.filter(w=>w.approved).map(w=>Object.assign({},w,{likes:st.likes[w.id]||0}))]};
@@ -1232,9 +1240,9 @@ async function drawG(){
     const liked = P().likes;
     box.innerHTML = items.length ? `<div class="gal">${items.map(w=>`<div class="gi">
       <div class="th" data-zoom="${esc(w.photo)}">${w.photo?`<img src="${esc(w.photo)}" alt="${esc(w.title)}" loading="lazy">`:'<div class="ph">Робота</div>'}</div>
-      <div class="bd">${w.winner?'<span class="win-tag">🏆 Переможниця тижня</span>':w.challenge?'<span class="ch-tag">Челендж</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)}</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p>
+      <div class="bd">${w.winner?'<span class="win-tag">🏆 Переможниця тижня</span>':w.challenge?'<span class="ch-tag">Челендж</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)}</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p>${w.link?`<a class="btn sm wlink" href="${esc(w.link)}" target="_blank" rel="noopener">🔗 Відкрити роботу</a>`:""}
       ${isAdmin()&&GF!=="mine"&&w.challenge&&!w.winner?`<button class="btn sm gold" type="button" data-win="${esc(w.id)}" style="align-self:flex-start">🏆 Обрати переможницею</button>`:""}
-      <div class="ft">${GF==="mine"?`<span class="badge ${w.approved?"b-ok":"b-wait"}">${w.approved?"На дошці":"На перевірці"}</span>`:`<span>${esc(w.name||"")}</span>
+      <div class="ft">${GF==="mine"?`${(()=>{ const st=w.status||(w.approved?"ok":w.rejected?"no":"new"); return `<span class="badge ${st==="ok"||st==="hid"?"b-ok":st==="no"?"b-no":"b-wait"}">${st==="ok"?"На дошці":st==="hid"?"Схвалено ✓":st==="no"?"Не прийнято":"На перевірці"}</span>`; })()}`:`<span>${esc(w.name||"")}</span>
         <button class="like ${liked.includes(w.id)?"on":""}" data-l="${esc(w.id)}">${I.heart}<span>${w.likes||0}</span></button>`}</div></div></div>`).join("")}</div>`
       : `<div class="empty">${GF==="mine"?"Ви ще не надсилали робіт. Натисніть «+ Додати роботу».":"Тут поки порожньо. Станьте першою!"}</div>`;
     box.querySelectorAll("[data-zoom]").forEach(t=>t.onclick=()=>{ if(t.dataset.zoom) modal(`<img class="zoom" src="${esc(t.dataset.zoom)}" alt="">`, true); });
@@ -1261,10 +1269,13 @@ function workForm(forCh, forLesson){
     <div class="form" id="wf">
       <div><label class="lbl" for="wt">Назва</label><input class="fi" id="wt" maxlength="80" placeholder="Наприклад: Картки «Зимові птахи»"></div>
       <div><label class="lbl" for="wd">Кілька слів про роботу</label><textarea class="ta" id="wd" maxlength="400" style="min-height:90px" placeholder="Для якого класу, яким сервісом зроблено"></textarea></div>
-      <div><label class="lbl">Фото роботи</label><div class="drop" id="wdrop">Натисніть, щоб обрати зображення</div><input type="file" id="wfile" accept="image/*" class="hidden"></div>
+      <div><label class="lbl" for="wlink">Посилання на роботу</label><input class="fi" id="wlink" type="url" inputmode="url" maxlength="500" placeholder="https://… (гра, презентація, Canva, Google Диск)">
+        <div class="note" style="margin-top:6px;font-size:14px">Додайте посилання, щоб колеги могли відкрити й спробувати вашу роботу, а не лише побачити скриншот. Перевірте, що доступ відкритий для всіх, хто має посилання.</div></div>
+      <div><label class="lbl">Фото або скриншот роботи</label><div class="drop" id="wdrop">Натисніть, щоб обрати зображення</div><input type="file" id="wfile" accept="image/*" class="hidden"></div>
       <div><label class="lbl">Що це за робота?</label><div class="wkind">
         ${ch?`<label id="wkch"><input type="radio" name="wk" value="ch" ${forCh?"checked":""}><span><b>Челендж тижня</b> · +15 балів<br><small>${esc(ch.desc)}</small><small class="wk-note">На один челендж можна надіслати одну роботу.</small></span></label>`:""}
         ${LS.length?`<label><input type="radio" name="wk" value="lesson" ${forLesson?"checked":""}><span><b>Практичне завдання до уроку</b> · +10 балів</span></label>
+          <small class="wk-note" style="margin:-4px 0 0 30px">До одного уроку можна надіслати одне практичне завдання.</small>
           <select class="sel ${forLesson?"":"hidden"}" id="wl"><option value="">Оберіть урок…</option>${LS.map(l=>`<option ${forLesson===l.title?"selected":""}>${esc(l.title)}</option>`).join("")}</select>`:""}
         <label><input type="radio" name="wk" value="free" ${!forCh&&!forLesson?"checked":""}><span><b>Просто моя робота</b><br><small>щоб поділитися з колегами</small></span></label>
       </div></div>
@@ -1273,9 +1284,12 @@ function workForm(forCh, forLesson){
     </div>`);
   let photo="";
   pickImage($("#wdrop"), $("#wfile"), d=>photo=d);
-  if(ch && !isAdmin()) api("myWorks").then(r=>{
-    if(!r.ok || !(r.items||[]).some(w=>w.chId===ch.id && !w.rejected)) return;
-    const lab=m.querySelector("#wkch"); if(!lab) return; const inp=lab.querySelector("input");
+  if(!isAdmin()) api("myWorks").then(r=>{
+    if(!r.ok) return;
+    const doneL=new Set((r.items||[]).filter(w=>w.lesson && !w.rejected).map(w=>String(w.lesson).trim()));
+    const sel=m.querySelector("#wl"); if(sel) [...sel.options].forEach(o=>{ if(o.value && doneL.has(o.value.trim())){ o.disabled=true; o.textContent=o.value+" ✓ надіслано"; if(o.selected) sel.value=""; } });
+    if(!(r.items||[]).some(w=>w.chId===ch.id && !w.rejected)) return;
+    if(!ch) return; const lab=m.querySelector("#wkch"); if(!lab) return; const inp=lab.querySelector("input");
     if(inp.checked){ inp.checked=false; const f=m.querySelector('[name=wk][value=free]'); if(f) f.checked=true; }
     inp.disabled=true; lab.classList.add("done");
     lab.querySelector(".wk-note").textContent="✓ Ви вже надіслали роботу на цей челендж. Наступний челендж — з понеділка.";
@@ -1284,11 +1298,13 @@ function workForm(forCh, forLesson){
   $("#wsend").onclick = async () => {
     const kind=(m.querySelector("[name=wk]:checked")||{}).value||"free";
     const title=$("#wt").value.trim(), desc=$("#wd").value.trim(), challenge=kind==="ch", lesson=kind==="lesson"&&$("#wl")?$("#wl").value:"";
+    let link=$("#wlink").value.trim(); if(link && !/^https?:\/\//i.test(link)) link="https://"+link;
+    if(link && !/^https?:\/\/[^\s.]+\.[^\s]+$/i.test(link)){ toast("Перевірте посилання: схоже, воно неповне"); return; }
     if(kind==="lesson" && !lesson){ toast("Оберіть урок, до якого це завдання"); return; }
     if(!title){ toast("Вкажіть назву роботи"); return; }
     if(!photo){ toast("Додайте фото роботи"); return; }
     const b=$("#wsend"); b.disabled=true; b.textContent="Надсилаю…";
-    try{ const r=await api("submitWork",{title,desc,photo,challenge,lesson});
+    try{ const r=await api("submitWork",{title,desc,photo,challenge,lesson,link});
       if(!r.ok && challenge && /вже надіслали/.test(r.message||"")){ const lab=m.querySelector("#wkch"); if(lab){ lab.classList.add("done"); lab.querySelector("input").disabled=true; } }
       if(r.ok){ const p=P(); p.works++; if(challenge) p.chWorks++; saveP(p); m.remove(); toast("Роботу отримано! Вона з'явиться після перевірки."); GF="mine"; drawG(); return; }
       toast(r.message||"Не вдалося надіслати"); }
@@ -1798,22 +1814,25 @@ async function aWorks(box){
   box.innerHTML='<div class="load"><div class="spin"></div></div>';
   try{
     const r=await api("adminWorks",{status:WSTATUS}); const items=r.items||[], c=r.counts||{};
-    const TABS=[["new","На перевірці"],["ok","На дошці"],["no","Сховані"],["all","Усі"]];
-    const TAG={new:'<span class="wst w-new">На перевірці</span>',ok:'<span class="wst w-ok">На дошці</span>',no:'<span class="wst w-no">Схована</span>'};
-    const acts=w=>w.status==="new"?`<button class="btn sm" type="button" data-ok="1">Схвалити</button><button class="btn ghost sm" type="button" data-ok="0">Відхилити</button>`
-      : w.status==="ok"?`<button class="btn ghost sm" type="button" data-ok="0">🙈 Сховати з дошки</button><button class="btn ghost sm del" type="button" data-del="1">🗑 Видалити</button>`
-      : `<button class="btn sm" type="button" data-ok="1">👁 Показати на дошці</button><button class="btn ghost sm del" type="button" data-del="1">🗑 Видалити</button>`;
-    const MSG={new:"Нових робіт на перевірці немає.",ok:"На дошці поки немає робіт.",no:"Схованих робіт немає.",all:"Робіт поки немає."};
+    const TABS=[["new","На перевірці"],["ok","На дошці"],["off","Не на дошці"],["all","Усі"]];
+    const TAG={new:'<span class="wst w-new">На перевірці</span>',ok:'<span class="wst w-ok">На дошці</span>',hid:'<span class="wst w-hid">Схвалена, не на дошці</span>',no:'<span class="wst w-no">Відхилена</span>'};
+    const acts=w=>w.status==="new"?`<label class="wshow"><input type="checkbox" checked> Показати на дошці всім</label><div class="arow"><button class="btn sm" type="button" data-st="approve">✓ Схвалити</button><button class="btn ghost sm" type="button" data-st="reject">Відхилити</button></div>`
+      : w.status==="ok"?`<div class="arow"><button class="btn ghost sm" type="button" data-st="hide">🙈 Прибрати з дошки</button><button class="btn ghost sm del" type="button" data-del="1">🗑 Видалити</button></div>`
+      : w.status==="hid"?`<div class="arow"><button class="btn sm" type="button" data-st="show">👁 Показати на дошці</button><button class="btn ghost sm del" type="button" data-del="1">🗑 Видалити</button></div>`
+      : `<div class="arow"><button class="btn sm" type="button" data-st="show">✓ Схвалити й показати</button><button class="btn ghost sm del" type="button" data-del="1">🗑 Видалити</button></div>`;
+    const MSG={new:"Нових робіт на перевірці немає.",ok:"На дошці поки немає робіт.",off:"Тут з'являться схвалені роботи, які ви не показали на дошці, і відхилені.",all:"Робіт поки немає."};
     box.innerHTML = `<div class="tabs wtabs">${TABS.map(([k,t])=>`<button type="button" class="${WSTATUS===k?"on":""}" data-ws="${k}">${t}${c[k]!=null?` · ${c[k]}`:""}</button>`).join("")}</div>
       ${items.length?`<div class="gal">${items.map(w=>`<div class="gi" data-id="${esc(w.id)}">
       <div class="th" data-zoom="${esc(w.photo)}">${w.photo?`<img src="${esc(w.photo)}" alt="${esc(w.title)}" loading="lazy">`:'<div class="ph">Робота</div>'}</div>
-      <div class="bd">${TAG[w.status]||""}${w.winner?'<span class="win-tag">🏆 Переможниця</span>':""}${w.challenge?'<span class="ch-tag">Челендж · +15</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)} · +10</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p><p><b>${esc(w.name)}</b> · ${esc(fmtDate(w.date))}</p>
-      <div class="arow">${acts(w)}</div></div></div>`).join("")}</div>`:`<div class="empty">${MSG[WSTATUS]}</div>`}`;
+      <div class="bd">${TAG[w.status]||""}${w.winner?'<span class="win-tag">🏆 Переможниця</span>':""}${w.challenge?'<span class="ch-tag">Челендж · +15</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)} · +10</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p>${w.link?`<a class="btn sm wlink" href="${esc(w.link)}" target="_blank" rel="noopener">🔗 Відкрити роботу</a>`:""}<p><b>${esc(w.name)}</b> · ${esc(fmtDate(w.date))}</p>
+      ${acts(w)}</div></div>`).join("")}</div>`:`<div class="empty">${MSG[WSTATUS]}</div>`}`;
     box.querySelectorAll("[data-ws]").forEach(b=>b.onclick=()=>{ WSTATUS=b.dataset.ws; aWorks(box); });
     box.querySelectorAll("[data-zoom]").forEach(t=>t.onclick=()=>{ if(t.dataset.zoom) modal(`<img class="zoom" src="${esc(t.dataset.zoom)}" alt="">`, true); });
-    box.querySelectorAll(".gi [data-ok]").forEach(b=>b.onclick=async()=>{
-      const card=b.closest(".gi"), yes=b.dataset.ok==="1";
-      const ok=await adminSend(b,"adminApprove",{id:card.dataset.id,approve:yes}, yes?"Роботу показано на дошці":"Роботу сховано з дошки");
+    const MSGS={show:"Роботу показано на дошці",hide:"Роботу прибрано з дошки, бали залишилися",reject:"Роботу відхилено"};
+    box.querySelectorAll(".gi [data-st]").forEach(b=>b.onclick=async()=>{
+      const card=b.closest(".gi"); let state=b.dataset.st;
+      if(state==="approve"){ const cb=card.querySelector(".wshow input"); state=cb&&!cb.checked?"hide":"show"; }
+      const ok=await adminSend(b,"adminApprove",{id:card.dataset.id,state}, state==="hide"&&b.dataset.st==="approve"?"Роботу схвалено, бали нараховано. На дошці її не видно":MSGS[state]);
       if(ok) aWorks(box);
     });
     box.querySelectorAll(".gi [data-del]").forEach(b=>b.onclick=async()=>{
