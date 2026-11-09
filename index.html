@@ -380,6 +380,9 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 @media (prefers-reduced-motion:reduce){.totop{transition:none}}
 .rc .th.lth{background:#F3F6FB}
 .rc .th.lth img{object-fit:cover;object-position:center top}
+.wtabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.wst{display:inline-block;font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;align-self:flex-start}
+.w-new{background:#FFF1C9;color:#8A5A00}.w-ok{background:#DDF5E6;color:#1E7A45}.w-no{background:#ECEEF3;color:#5B6480}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -740,9 +743,12 @@ async function demoApi(action, p){
         {row:"s0", name:"Олена Петренко", date:"2026-11-04", type:"Потрібен промпт", text:"Як зробити гру-вікторину для 3 класу за допомогою ШІ?", prompt:"", photo:"", answer:st.seedQ.answer, public:st.seedQ.public}]}; }
     case "adminAnswer": if(p.row==="s0") st.seedQ={answer:p.answer,public:p.public}; else { const q=st.questions[+String(p.row).slice(1)]; if(q){ q.answer=p.answer; q.public=p.public; } } lsSet("cu_demo",st); return {ok:true};
     case "adminWorks": { st.seedW = st.seedW || "";
-      const own = st.works.filter(w=>!w.approved && !w.rejected);
-      return {ok:true, items:[...own, ...(st.seedW?[]:[{id:"s1", name:"Ірина Коваль", date:"2026-11-05", title:"Картки «Зимові птахи»", desc:"Для уроку ЯДС, 2 клас", photo:IMG.recipeDemo, challenge:true}])]}; }
-    case "adminApprove": if(p.id==="s1") st.seedW=p.approve?"ok":"no"; else { const w=st.works.find(x=>x.id===p.id); if(w){ if(p.approve){ w.approved=true; if(w.challenge) demoPts(st,"Робота на челендж: "+w.title,15,"c:"+w.id); else if(w.lesson) demoPts(st,"Практичне завдання: "+w.lesson,10,"p:"+w.id); } else w.rejected=true; } } lsSet("cu_demo",st); return {ok:true};
+      const seed=st.seedW==="del"?[]:[{id:"s1", name:"Ірина Коваль", date:"2026-11-05", title:"Картки «Зимові птахи»", desc:"Для уроку ЯДС, 2 клас", photo:IMG.recipeDemo, challenge:true, approved:st.seedW==="ok", rejected:st.seedW==="no"}];
+      const all=[...st.works, ...seed].map(w=>Object.assign({},w,{status:w.approved?"ok":w.rejected?"no":"new"}));
+      const counts={new:0,ok:0,no:0,all:all.length}; all.forEach(w=>counts[w.status]++);
+      return {ok:true, counts, items:all.filter(w=>p.status==="all"||w.status===(p.status||"new"))}; }
+    case "adminDeleteWork": if(p.id==="s1") st.seedW="del"; else st.works=st.works.filter(w=>w.id!==p.id); st.pts=(st.pts||[]).filter(x=>!x.key.endsWith(":"+p.id)); lsSet("cu_demo",st); return {ok:true};
+    case "adminApprove": if(p.id==="s1") st.seedW=p.approve?"ok":"no"; else { const w=st.works.find(x=>x.id===p.id); if(w){ if(p.approve){ w.approved=true; w.rejected=false; if(w.challenge) demoPts(st,"Робота на челендж: "+w.title,15,"c:"+w.id); else if(w.lesson) demoPts(st,"Практичне завдання: "+w.lesson,10,"p:"+w.id); } else { w.rejected=true; w.approved=false; } } } lsSet("cu_demo",st); return {ok:true};
     case "adminWinner": { const w=st.works.find(x=>x.id===p.id); if(w){ w.winner=true; demoPts(st,"Переможниця челенджу: "+w.title,20,"w:"+w.id); } else (st.winners=st.winners||[]).push(p.id); lsSet("cu_demo",st); return {ok:true}; }
     case "progress": demoPts(st, p.kind==="lesson"?"Урок пройдено":"Тренажер пройдено", 5, p.kind+":"+p.id); lsSet("cu_demo",st); return {ok:true};
     case "rating": case "adminRating": { const mine=(st.pts||[]).reduce((a,x)=>a+x.points,0); const ym=new Date().toISOString().slice(0,7);
@@ -1776,20 +1782,33 @@ async function aQuestions(box){
     }; });
   }catch(err){ if(err.message!=="auth") box.innerHTML='<div class="empty">Не вдалося завантажити. Перевірте інтернет.</div>'; }
 }
+let WSTATUS="new";
 async function aWorks(box){
   box.innerHTML='<div class="load"><div class="spin"></div></div>';
   try{
-    const r=await api("adminWorks"); const items=r.items||[];
-    box.innerHTML = items.length ? `<p style="margin:0 0 14px;font-weight:700;color:var(--navy)">На перевірці: <span id="wcount">${items.length}</span></p><div class="gal">${items.map(w=>`<div class="gi" data-id="${esc(w.id)}">
+    const r=await api("adminWorks",{status:WSTATUS}); const items=r.items||[], c=r.counts||{};
+    const TABS=[["new","На перевірці"],["ok","На дошці"],["no","Сховані"],["all","Усі"]];
+    const TAG={new:'<span class="wst w-new">На перевірці</span>',ok:'<span class="wst w-ok">На дошці</span>',no:'<span class="wst w-no">Схована</span>'};
+    const acts=w=>w.status==="new"?`<button class="btn sm" type="button" data-ok="1">Схвалити</button><button class="btn ghost sm" type="button" data-ok="0">Відхилити</button>`
+      : w.status==="ok"?`<button class="btn ghost sm" type="button" data-ok="0">🙈 Сховати з дошки</button><button class="btn ghost sm del" type="button" data-del="1">🗑 Видалити</button>`
+      : `<button class="btn sm" type="button" data-ok="1">👁 Показати на дошці</button><button class="btn ghost sm del" type="button" data-del="1">🗑 Видалити</button>`;
+    const MSG={new:"Нових робіт на перевірці немає.",ok:"На дошці поки немає робіт.",no:"Схованих робіт немає.",all:"Робіт поки немає."};
+    box.innerHTML = `<div class="tabs wtabs">${TABS.map(([k,t])=>`<button type="button" class="${WSTATUS===k?"on":""}" data-ws="${k}">${t}${c[k]!=null?` · ${c[k]}`:""}</button>`).join("")}</div>
+      ${items.length?`<div class="gal">${items.map(w=>`<div class="gi" data-id="${esc(w.id)}">
       <div class="th" data-zoom="${esc(w.photo)}">${w.photo?`<img src="${esc(w.photo)}" alt="${esc(w.title)}" loading="lazy">`:'<div class="ph">Робота</div>'}</div>
-      <div class="bd">${w.challenge?'<span class="ch-tag">Челендж · +15</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)} · +10</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p><p><b>${esc(w.name)}</b> · ${esc(fmtDate(w.date))}</p>
-      <div class="arow"><button class="btn sm" type="button" data-ok="1">Схвалити</button><button class="btn ghost sm" type="button" data-ok="0">Відхилити</button></div></div></div>`).join("")}</div>`
-      : '<div class="empty">Нових робіт на перевірці немає.</div>';
+      <div class="bd">${TAG[w.status]||""}${w.winner?'<span class="win-tag">🏆 Переможниця</span>':""}${w.challenge?'<span class="ch-tag">Челендж · +15</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)} · +10</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p><p><b>${esc(w.name)}</b> · ${esc(fmtDate(w.date))}</p>
+      <div class="arow">${acts(w)}</div></div></div>`).join("")}</div>`:`<div class="empty">${MSG[WSTATUS]}</div>`}`;
+    box.querySelectorAll("[data-ws]").forEach(b=>b.onclick=()=>{ WSTATUS=b.dataset.ws; aWorks(box); });
     box.querySelectorAll("[data-zoom]").forEach(t=>t.onclick=()=>{ if(t.dataset.zoom) modal(`<img class="zoom" src="${esc(t.dataset.zoom)}" alt="">`, true); });
     box.querySelectorAll(".gi [data-ok]").forEach(b=>b.onclick=async()=>{
-      const c=b.closest(".gi"), yes=b.dataset.ok==="1";
-      const ok=await adminSend(b,"adminApprove",{id:c.dataset.id,approve:yes}, yes?"Роботу додано на дошку":"Роботу відхилено");
-      if(ok){ c.remove(); const n=$("#wcount"); if(n) n.textContent=+n.textContent-1; }
+      const card=b.closest(".gi"), yes=b.dataset.ok==="1";
+      const ok=await adminSend(b,"adminApprove",{id:card.dataset.id,approve:yes}, yes?"Роботу показано на дошці":"Роботу сховано з дошки");
+      if(ok) aWorks(box);
+    });
+    box.querySelectorAll(".gi [data-del]").forEach(b=>b.onclick=async()=>{
+      if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, видалити назавжди"; return; }
+      const ok=await adminSend(b,"adminDeleteWork",{id:b.closest(".gi").dataset.id},"Роботу видалено");
+      if(ok) aWorks(box);
     });
   }catch(err){ if(err.message!=="auth") box.innerHTML='<div class="empty">Не вдалося завантажити. Перевірте інтернет.</div>'; }
 }
