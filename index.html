@@ -383,6 +383,9 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .wtabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
 .wst{display:inline-block;font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;align-self:flex-start}
 .w-new{background:#FFF1C9;color:#8A5A00}.w-ok{background:#DDF5E6;color:#1E7A45}.w-no{background:#ECEEF3;color:#5B6480}
+.wk-note{display:block;margin-top:4px;color:var(--muted)}
+.wkind label.done{opacity:.75;cursor:default}
+.wkind label.done .wk-note{color:#1E7A45;font-weight:700}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -1260,7 +1263,7 @@ function workForm(forCh, forLesson){
       <div><label class="lbl" for="wd">Кілька слів про роботу</label><textarea class="ta" id="wd" maxlength="400" style="min-height:90px" placeholder="Для якого класу, яким сервісом зроблено"></textarea></div>
       <div><label class="lbl">Фото роботи</label><div class="drop" id="wdrop">Натисніть, щоб обрати зображення</div><input type="file" id="wfile" accept="image/*" class="hidden"></div>
       <div><label class="lbl">Що це за робота?</label><div class="wkind">
-        ${ch?`<label><input type="radio" name="wk" value="ch" ${forCh?"checked":""}><span><b>Челендж тижня</b> · +15 балів<br><small>${esc(ch.desc)}</small></span></label>`:""}
+        ${ch?`<label id="wkch"><input type="radio" name="wk" value="ch" ${forCh?"checked":""}><span><b>Челендж тижня</b> · +15 балів<br><small>${esc(ch.desc)}</small><small class="wk-note">На один челендж можна надіслати одну роботу.</small></span></label>`:""}
         ${LS.length?`<label><input type="radio" name="wk" value="lesson" ${forLesson?"checked":""}><span><b>Практичне завдання до уроку</b> · +10 балів</span></label>
           <select class="sel ${forLesson?"":"hidden"}" id="wl"><option value="">Оберіть урок…</option>${LS.map(l=>`<option ${forLesson===l.title?"selected":""}>${esc(l.title)}</option>`).join("")}</select>`:""}
         <label><input type="radio" name="wk" value="free" ${!forCh&&!forLesson?"checked":""}><span><b>Просто моя робота</b><br><small>щоб поділитися з колегами</small></span></label>
@@ -1270,6 +1273,13 @@ function workForm(forCh, forLesson){
     </div>`);
   let photo="";
   pickImage($("#wdrop"), $("#wfile"), d=>photo=d);
+  if(ch && !isAdmin()) api("myWorks").then(r=>{
+    if(!r.ok || !(r.items||[]).some(w=>w.chId===ch.id && !w.rejected)) return;
+    const lab=m.querySelector("#wkch"); if(!lab) return; const inp=lab.querySelector("input");
+    if(inp.checked){ inp.checked=false; const f=m.querySelector('[name=wk][value=free]'); if(f) f.checked=true; }
+    inp.disabled=true; lab.classList.add("done");
+    lab.querySelector(".wk-note").textContent="✓ Ви вже надіслали роботу на цей челендж. Наступний челендж — з понеділка.";
+  }).catch(()=>{});
   m.querySelectorAll("[name=wk]").forEach(r=>r.onchange=()=>{ const s=$("#wl"); if(s) s.classList.toggle("hidden", m.querySelector("[name=wk]:checked").value!=="lesson"); });
   $("#wsend").onclick = async () => {
     const kind=(m.querySelector("[name=wk]:checked")||{}).value||"free";
@@ -1279,6 +1289,7 @@ function workForm(forCh, forLesson){
     if(!photo){ toast("Додайте фото роботи"); return; }
     const b=$("#wsend"); b.disabled=true; b.textContent="Надсилаю…";
     try{ const r=await api("submitWork",{title,desc,photo,challenge,lesson});
+      if(!r.ok && challenge && /вже надіслали/.test(r.message||"")){ const lab=m.querySelector("#wkch"); if(lab){ lab.classList.add("done"); lab.querySelector("input").disabled=true; } }
       if(r.ok){ const p=P(); p.works++; if(challenge) p.chWorks++; saveP(p); m.remove(); toast("Роботу отримано! Вона з'явиться після перевірки."); GF="mine"; drawG(); return; }
       toast(r.message||"Не вдалося надіслати"); }
     catch(err){ if(err.message!=="auth") toast("Немає зв'язку. Спробуйте ще раз."); }
