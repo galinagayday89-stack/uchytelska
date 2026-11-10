@@ -756,6 +756,8 @@ async function demoApi(action, p){
       const counts={new:0,ok:0,off:0,all:all.length}; all.forEach(w=>{ if(w.status==="new"||w.status==="ok") counts[w.status]++; else counts.off++; });
       const want=p.status||"new";
       return {ok:true, counts, items:all.filter(w=>want==="all"||w.status===want||(want==="off"&&(w.status==="no"||w.status==="hid")))}; }
+    case "myEditWork": { const w=st.works.find(x=>x.id===p.id); if(!w) return {ok:false,message:"Роботу не знайдено"}; w.title=p.title; w.desc=p.desc; w.link=p.link; if(p.photo) w.photo=p.photo; lsSet("cu_demo",st); return {ok:true}; }
+    case "myDeleteWork": st.works=st.works.filter(w=>w.id!==p.id); st.pts=(st.pts||[]).filter(x=>!x.key.endsWith(":"+p.id)); lsSet("cu_demo",st); return {ok:true};
     case "adminDeleteWork": if(p.id==="s1") st.seedW="del"; else st.works=st.works.filter(w=>w.id!==p.id); st.pts=(st.pts||[]).filter(x=>!x.key.endsWith(":"+p.id)); lsSet("cu_demo",st); return {ok:true};
     case "adminApprove": { const state=p.state||(p.approve?"show":"reject"); const ST={show:"ok",hide:"hid",reject:"no"}[state];
       if(p.id==="s1") st.seedW=ST; else { const w=st.works.find(x=>x.id===p.id); if(w){ w.state=ST; w.approved=ST==="ok"; w.rejected=ST==="no"; if(ST!=="no"){ if(w.challenge) demoPts(st,"Робота на челендж: "+w.title,15,"c:"+w.id); else if(w.lesson) demoPts(st,"Практичне завдання: "+w.lesson,10,"p:"+w.id); } } }
@@ -1241,11 +1243,17 @@ async function drawG(){
     box.innerHTML = items.length ? `<div class="gal">${items.map(w=>`<div class="gi">
       <div class="th" data-zoom="${esc(w.photo)}">${w.photo?`<img src="${esc(w.photo)}" alt="${esc(w.title)}" loading="lazy">`:'<div class="ph">Робота</div>'}</div>
       <div class="bd">${w.winner?'<span class="win-tag">🏆 Переможниця тижня</span>':w.challenge?'<span class="ch-tag">Челендж</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)}</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p>${w.link?`<a class="btn sm wlink" href="${esc(w.link)}" target="_blank" rel="noopener">🔗 Відкрити роботу</a>`:""}
+      ${GF==="mine"?`<div class="arow"><button class="btn ghost sm" type="button" data-me="${esc(w.id)}">✏️ Виправити</button><button class="btn ghost sm del" type="button" data-md="${esc(w.id)}">🗑 Видалити</button></div>`:""}
       ${isAdmin()&&GF!=="mine"&&w.challenge&&!w.winner?`<button class="btn sm gold" type="button" data-win="${esc(w.id)}" style="align-self:flex-start">🏆 Обрати переможницею</button>`:""}
       <div class="ft">${GF==="mine"?`${(()=>{ const st=w.status||(w.approved?"ok":w.rejected?"no":"new"); return `<span class="badge ${st==="ok"||st==="hid"?"b-ok":st==="no"?"b-no":"b-wait"}">${st==="ok"?"На дошці":st==="hid"?"Схвалено ✓":st==="no"?"Не прийнято":"На перевірці"}</span>`; })()}`:`<span>${esc(w.name||"")}</span>
         <button class="like ${liked.includes(w.id)?"on":""}" data-l="${esc(w.id)}">${I.heart}<span>${w.likes||0}</span></button>`}</div></div></div>`).join("")}</div>`
       : `<div class="empty">${GF==="mine"?"Ви ще не надсилали робіт. Натисніть «+ Додати роботу».":"Тут поки порожньо. Станьте першою!"}</div>`;
     box.querySelectorAll("[data-zoom]").forEach(t=>t.onclick=()=>{ if(t.dataset.zoom) modal(`<img class="zoom" src="${esc(t.dataset.zoom)}" alt="">`, true); });
+    box.querySelectorAll("[data-me]").forEach(b=>b.onclick=()=>editMyWork(items.find(x=>String(x.id)===b.dataset.me)));
+    box.querySelectorAll("[data-md]").forEach(b=>b.onclick=async()=>{
+      if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, видалити (бали за неї зникнуть)"; return; }
+      b.disabled=true; try{ const r=await api("myDeleteWork",{id:b.dataset.md}); if(r.ok){ toast("Роботу видалено"); drawG(); } else { toast(r.message||"Не вдалося видалити. Оновіть сторінку"); b.disabled=false; } }catch(e){ b.disabled=false; }
+    });
     box.querySelectorAll("[data-win]").forEach(b=>b.onclick=async()=>{
       if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, переможниця (+20 балів)"; return; }
       b.disabled=true; try{ const r=await api("adminWinner",{id:b.dataset.win}); if(r.ok){ toast("Переможницю обрано! +20 балів"); drawG(); } else { toast(r.message||"Не вдалося"); b.disabled=false; } }catch(e){ b.disabled=false; }
@@ -1257,6 +1265,29 @@ async function drawG(){
       try{ await api("like",{id, undo:on}); }catch(e){}
     });
   }catch(err){ if(err.message!=="auth") box.innerHTML='<div class="empty">Не вдалося завантажити. Перевірте інтернет.</div>'; }
+}
+function editMyWork(w){
+  if(!w) return;
+  const m = modal(`<div class="chead"><div class="ic">${I.image}</div><h2>Виправити роботу</h2></div>
+    <div class="form">
+      <div><label class="lbl" for="ewt">Назва</label><input class="fi" id="ewt" maxlength="80"></div>
+      <div><label class="lbl" for="ewd">Кілька слів про роботу</label><textarea class="ta" id="ewd" maxlength="400" style="min-height:90px"></textarea></div>
+      <div><label class="lbl" for="ewl">Посилання на роботу</label><input class="fi" id="ewl" type="url" inputmode="url" maxlength="500" placeholder="https://…"></div>
+      <div><label class="lbl">Фото або скриншот</label><div class="drop" id="ewdrop">${w.photo?`<img src="${esc(w.photo)}" alt="Поточне фото">Натисніть, щоб замінити`:"Натисніть, щоб обрати зображення"}</div><input type="file" id="ewfile" accept="image/*" class="hidden"></div>
+      <div class="note">Тип роботи (челендж чи урок) змінити не можна. Якщо помилилися з ним, видаліть роботу й надішліть заново.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="ewsave">Зберегти зміни</button><button class="btn ghost" type="button" data-close>Скасувати</button></div>
+    </div>`);
+  m.querySelector("#ewt").value=w.title||""; m.querySelector("#ewd").value=w.desc||""; m.querySelector("#ewl").value=w.link||"";
+  let photo=""; pickImage(m.querySelector("#ewdrop"), m.querySelector("#ewfile"), d=>photo=d);
+  m.querySelector("#ewsave").onclick=async e=>{
+    const b=e.currentTarget, title=m.querySelector("#ewt").value.trim(), desc=m.querySelector("#ewd").value.trim();
+    let link=m.querySelector("#ewl").value.trim(); if(link && !/^https?:\/\//i.test(link)) link="https://"+link;
+    if(!title){ toast("Вкажіть назву"); return; }
+    if(link && !/^https?:\/\/[^\s.]+\.[^\s]+$/i.test(link)){ toast("Перевірте посилання: схоже, воно неповне"); return; }
+    b.disabled=true; b.textContent="Зберігаю…";
+    try{ const r=await api("myEditWork",{id:w.id,title,desc,link,photo}); if(r.ok){ m.remove(); toast("Зміни збережено"); drawG(); } else { toast(r.message||"Не вдалося зберегти"); b.disabled=false; b.textContent="Зберегти зміни"; } }
+    catch(err){ b.disabled=false; b.textContent="Зберегти зміни"; }
+  };
 }
 function modal(html, plain){
   const m=document.createElement("div"); m.className="modal"; m.innerHTML = plain?html:`<div class="card">${html}</div>`;
