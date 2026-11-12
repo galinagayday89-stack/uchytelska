@@ -438,6 +438,12 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .adv-rf{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
 @media (max-width:860px){.adv-wrap{grid-template-columns:1fr}.adv-side{position:static}}
 @media (max-width:560px){.adv-grid{gap:4px}.adv-d{min-height:58px;border-radius:10px}.adv-d b{font-size:19px}.adv-d small{font-size:10px;white-space:nowrap}.adv-d .sur{display:none}.adv-e{min-height:58px}.adv-rf{grid-template-columns:1fr}}
+.wcom{display:grid;gap:6px;margin:6px 0 4px}
+.wcom .ta{min-height:70px;font-size:15px}
+.wc-hint{color:var(--muted);font-size:12px}
+.wcomm{background:#FFF8E3;border-left:4px solid var(--yellow);border-radius:12px;padding:10px 12px;margin:4px 0}
+.wcomm b{color:var(--navy);font-size:14px}
+.wcomm p{margin:4px 0 0;white-space:pre-line}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -810,7 +816,9 @@ async function demoApi(action, p){
     case "myEditWork": { const w=st.works.find(x=>x.id===p.id); if(!w) return {ok:false,message:"Роботу не знайдено"}; w.title=p.title; w.desc=p.desc; w.link=p.link; if(p.photo) w.photo=p.photo; lsSet("cu_demo",st); return {ok:true}; }
     case "myDeleteWork": st.works=st.works.filter(w=>w.id!==p.id); st.pts=(st.pts||[]).filter(x=>!x.key.endsWith(":"+p.id)); lsSet("cu_demo",st); return {ok:true};
     case "adminDeleteWork": if(p.id==="s1") st.seedW="del"; else st.works=st.works.filter(w=>w.id!==p.id); st.pts=(st.pts||[]).filter(x=>!x.key.endsWith(":"+p.id)); lsSet("cu_demo",st); return {ok:true};
+    case "adminComment": { const w=st.works.find(x=>x.id===p.id); if(w){ w.comment=p.comment; lsSet("cu_demo",st); } return {ok:true}; }
     case "adminApprove": { const state=p.state||(p.approve?"show":"reject"); const ST={show:"ok",hide:"hid",reject:"no"}[state];
+      if(typeof p.comment==="string"){ const w0=st.works.find(x=>x.id===p.id); if(w0) w0.comment=p.comment; }
       if(p.id==="s1") st.seedW=ST; else { const w=st.works.find(x=>x.id===p.id); if(w){ w.state=ST; w.approved=ST==="ok"; w.rejected=ST==="no"; if(ST!=="no"){ if(w.challenge) demoPts(st,"Робота на челендж: "+w.title,15,"c:"+w.id); else if(w.lesson) demoPts(st,"Практичне завдання: "+w.lesson,10,"p:"+w.id); } } }
       lsSet("cu_demo",st); return {ok:true}; }
     case "adminWinner": { const w=st.works.find(x=>x.id===p.id); if(w){ w.winner=true; demoPts(st,"Переможниця челенджу: "+w.title,20,"w:"+w.id); } else (st.winners=st.winners||[]).push(p.id); lsSet("cu_demo",st); return {ok:true}; }
@@ -1294,6 +1302,7 @@ async function drawG(){
     box.innerHTML = items.length ? `<div class="gal">${items.map(w=>`<div class="gi">
       <div class="th" data-zoom="${esc(w.photo)}">${w.photo?`<img src="${esc(w.photo)}" alt="${esc(w.title)}" loading="lazy">`:'<div class="ph">Робота</div>'}</div>
       <div class="bd">${w.winner?'<span class="win-tag">🏆 Переможниця тижня</span>':w.challenge?'<span class="ch-tag">Челендж</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)}</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p>${w.link?`<a class="btn sm wlink" href="${esc(w.link)}" target="_blank" rel="noopener">🔗 Відкрити роботу</a>`:""}
+      ${GF==="mine"&&w.comment?`<div class="wcomm"><b>💬 Коментар Галини Гайдай</b><p>${esc(w.comment)}</p></div>`:""}
       ${GF==="mine"?`<div class="arow"><button class="btn ghost sm" type="button" data-me="${esc(w.id)}">✏️ Виправити</button><button class="btn ghost sm del" type="button" data-md="${esc(w.id)}">🗑 Видалити</button></div>`:""}
       ${isAdmin()&&GF!=="mine"&&w.challenge&&!w.winner?`<button class="btn sm gold" type="button" data-win="${esc(w.id)}" style="align-self:flex-start">🏆 Обрати переможницею</button>`:""}
       <div class="ft">${GF==="mine"?`${(()=>{ const st=w.status||(w.approved?"ok":w.rejected?"no":"new"); return `<span class="badge ${st==="ok"||st==="hid"?"b-ok":st==="no"?"b-no":"b-wait"}">${st==="ok"?"На дошці":st==="hid"?"Схвалено ✓":st==="no"?"Не прийнято":"На перевірці"}</span>`; })()}`:`<span>${esc(w.name||"")}</span>
@@ -1972,6 +1981,8 @@ async function aWorks(box){
       ${items.length?`<div class="gal">${items.map(w=>`<div class="gi" data-id="${esc(w.id)}">
       <div class="th" data-zoom="${esc(w.photo)}">${w.photo?`<img src="${esc(w.photo)}" alt="${esc(w.title)}" loading="lazy">`:'<div class="ph">Робота</div>'}</div>
       <div class="bd">${TAG[w.status]||""}${w.winner?'<span class="win-tag">🏆 Переможниця</span>':""}${w.challenge?'<span class="ch-tag">Челендж · +15</span>':""}${w.lesson?`<span class="wtag">Урок: ${esc(w.lesson)} · +10</span>`:""}<h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p>${w.link?`<a class="btn sm wlink" href="${esc(w.link)}" target="_blank" rel="noopener">🔗 Відкрити роботу</a>`:""}<p><b>${esc(w.name)}</b> · ${esc(fmtDate(w.date))}</p>
+      <div class="wcom"><label class="lbl" for="wc_${esc(w.id)}">💬 Коментар для учасниці</label><textarea class="ta wc" id="wc_${esc(w.id)}" maxlength="1000" placeholder="Що вдалося, що можна покращити… Побачить лише авторка роботи">${esc(w.comment||"")}</textarea>
+        ${w.status!=="new"?`<button class="btn ghost sm" type="button" data-cm="1">Зберегти коментар</button>`:'<small class="wc-hint">Коментар збережеться разом зі схваленням чи відхиленням</small>'}</div>
       ${acts(w)}</div></div>`).join("")}</div>`:`<div class="empty">${MSG[WSTATUS]}</div>`}`;
     box.querySelectorAll("[data-ws]").forEach(b=>b.onclick=()=>{ WSTATUS=b.dataset.ws; aWorks(box); });
     box.querySelectorAll("[data-zoom]").forEach(t=>t.onclick=()=>{ if(t.dataset.zoom) modal(`<img class="zoom" src="${esc(t.dataset.zoom)}" alt="">`, true); });
@@ -1979,9 +1990,11 @@ async function aWorks(box){
     box.querySelectorAll(".gi [data-st]").forEach(b=>b.onclick=async()=>{
       const card=b.closest(".gi"); let state=b.dataset.st;
       if(state==="approve"){ const cb=card.querySelector(".wshow input"); state=cb&&!cb.checked?"hide":"show"; }
-      const ok=await adminSend(b,"adminApprove",{id:card.dataset.id,state}, state==="hide"&&b.dataset.st==="approve"?"Роботу схвалено, бали нараховано. На дошці її не видно":MSGS[state]);
+      const comment=card.querySelector(".wc")?card.querySelector(".wc").value:undefined;
+      const ok=await adminSend(b,"adminApprove",{id:card.dataset.id,state,comment}, state==="hide"&&b.dataset.st==="approve"?"Роботу схвалено, бали нараховано. На дошці її не видно":MSGS[state]);
       if(ok) aWorks(box);
     });
+    box.querySelectorAll(".gi [data-cm]").forEach(b=>b.onclick=()=>{ const card=b.closest(".gi"); adminSend(b,"adminComment",{id:card.dataset.id,comment:card.querySelector(".wc").value},"Коментар збережено"); });
     box.querySelectorAll(".gi [data-del]").forEach(b=>b.onclick=async()=>{
       if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, видалити назавжди"; return; }
       const ok=await adminSend(b,"adminDeleteWork",{id:b.closest(".gi").dataset.id},"Роботу видалено");
