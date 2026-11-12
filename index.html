@@ -779,10 +779,12 @@ async function demoApi(action, p){
       recipes:[...(st.recipes||[]).map(r=>Object.assign({},r,{hidden:!r.show})), ...DEMO_DATA.recipes],
       lessons:[...DEMO_DATA.lessons, ...(st.lessons||[]).map(l=>Object.assign({},l,{hidden:!l.show}))],
       projects:(st.projects||[]).map(x=>Object.assign({},x,{hidden:!x.show})),
+      advShow: st.advShow!==false,
       advent: st.advent || [{day:1,author:"Ірина Семенова",title:"Перший день зими: Снігова симетрія",state:"ready"},{day:2,author:"Леся Ільніцька",title:"Снігова ковдра для природи",state:"ready"},{day:6,author:"Лілія Гайдай",title:"Чарівний день Святого Миколая",state:"taken"}],
       challenge: st.challenge || DEMO_DATA.challenge, role:"admin"});
     case "adminProjects": return {ok:true, items:(st.projects||[])};
-    case "adminSetAdvent": st.advent=p.days; lsSet("cu_demo",st); return {ok:true};
+    case "adminSetAdvent": st.advent=p.days; st.advShow=p.show; lsSet("cu_demo",st); return {ok:true};
+    case "adminAdvent": return {ok:true, items: st.advent||[], show: st.advShow!==false};
     case "adminAddProject": { const id="p"+Date.now(); (st.projects=st.projects||[]).unshift(Object.assign({id, show:p.show}, p.project)); lsSet("cu_demo",st); return {ok:true,id}; }
     case "adminUpdateProject": { const x=(st.projects||[]).find(y=>y.id===p.id); if(!x) return {ok:false,message:"Проєкт не знайдено"}; const cv=x.cover; Object.assign(x,p.project,{show:p.show}); if(!p.project.cover) x.cover=cv; lsSet("cu_demo",st); return {ok:true}; }
     case "adminAddRecipe": (st.recipes=st.recipes||[]).unshift(Object.assign({id:"r"+Date.now(), img:p.photo||"", show:p.show}, p.recipe)); lsSet("cu_demo",st); return {ok:true};
@@ -877,7 +879,7 @@ async function ensureData(){
   DATA = lsGet("cu_cache_"+S.code, null);
   try{
     const r = await api("data");
-    if(r.ok){ DATA = {recipes:r.recipes||[], lessons:r.lessons||[], projects:r.projects||[], advent:r.advent||[], challenge:r.challenge||null}; lsSet("cu_cache_"+S.code, DATA); if(r.name){S.name=r.name; S.validTo=r.validTo; S.role=r.role||S.role; lsSet("cu_session",S);} }
+    if(r.ok){ DATA = {recipes:r.recipes||[], lessons:r.lessons||[], projects:r.projects||[], advent:r.advent||[], advShow:r.advShow!==false, challenge:r.challenge||null}; lsSet("cu_cache_"+S.code, DATA); if(r.name){S.name=r.name; S.validTo=r.validTo; S.role=r.role||S.role; lsSet("cu_session",S);} }
   }catch(e){ if(e.message==="auth") throw e; }
   if(!DATA) DATA={recipes:[],lessons:[],projects:[],challenge:null};
   if(!DATA.projects) DATA.projects=[];
@@ -1508,7 +1510,7 @@ const pAuthors = pr => [...new Set((pr.parts||[]).map(x=>String(x.author||"").tr
 function viewProjects(){
   const L=DATA.projects||[];
   app.innerHTML = crumbs(["Головна","home"],["Спільні проєкти"]) + ptitle("Спільні проєкти","Навчальні матеріали, які учасниці спільноти створили разом") + `
-  ${(()=>{ const D=advDays(), t=D.filter(x=>x.state!=="free").length; return `<section class="adv-ban" data-go="advent" role="link" tabindex="0"><div class="adv-ban-n">24</div><div class="tx"><div class="pj-eye">Готуємо разом · грудень</div><h3>Адвент-календар знань</h3><p>${t} з 24 днів уже мають авторок. Подивіться, хто що готує, і візьміть вільний день!</p></div><span class="btn pill gold">Відкрити ›</span></section>`; })()}
+  ${DATA.advShow===false&&!isAdmin()?"":(()=>{ const D=advDays(), t=D.filter(x=>x.state!=="free").length; return `${DATA.advShow===false?'<div class="note" style="margin-bottom:8px">Календар схований від учасниць. Бачите його лише ви.</div>':""}<section class="adv-ban" data-go="advent" role="link" tabindex="0"><div class="adv-ban-n">24</div><div class="tx"><div class="pj-eye">Готуємо разом · грудень</div><h3>Адвент-календар знань</h3><p>${t} з 24 днів уже мають авторок. Подивіться, хто що готує, і візьміть вільний день!</p></div><span class="btn pill gold">Відкрити ›</span></section>`; })()}
   <div class="grid3">${L.length?L.map(pr=>{ const a=pAuthors(pr), n=(pr.parts||[]).length;
     return `<article class="rc" data-go="project-${esc(pr.id)}"><div class="th pj-th">${pr.cover?`<img src="${esc(pr.cover)}" alt="" loading="lazy">`:`<div class="ph">${esc(pr.title)}</div>`}</div>
     <div class="bd">${pr.hidden?HID:""}<h3>${esc(pr.title)}</h3><p>${esc(pr.desc)}</p>
@@ -1612,6 +1614,7 @@ const advDays=()=>{ const A=DATA.advent||[], m={}; A.forEach(x=>m[+x.day]=x); re
 const advWd=d=>["Неділя","Понеділок","Вівторок","Середа","Четвер","Пʼятниця","Субота"][new Date(ADV_Y,ADV_M,d).getDay()];
 let ADV_SEL=0;
 function viewAdvent(){
+  if(DATA.advShow===false && !isAdmin()){ app.innerHTML=crumbs(["Спільні проєкти","projects"],["Адвент-календар знань"])+'<div class="empty">Календар зараз недоступний.</div>'; return; }
   const D=advDays(), ready=D.filter(x=>x.state==="ready").length, taken=D.filter(x=>x.state!=="free").length, free=D.filter(x=>x.state==="free").map(x=>x.day);
   if(!ADV_SEL) ADV_SEL=(D.find(x=>x.state!=="free")||D[0]).day;
   const lead=(new Date(ADV_Y,ADV_M,1).getDay()+6)%7;
@@ -1642,7 +1645,11 @@ function viewAdvent(){
   side();
   app.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>{ ADV_SEL=+b.dataset.ad; app.querySelectorAll("[data-ad]").forEach(z=>z.classList.toggle("sel",z===b)); side(); });
 }
+const ADV_SEED={1:["Ірина Семенова","Перший день зими: Снігова симетрія"],2:["Леся Ільніцька","Снігова ковдра для природи"],3:["Ірина Семенова","Секрет ажурної сніжинки: Паперова магія"],4:["Ірина Семенова","Зимова пошта: Загадка загубленого листа"],5:["Ірина Семенова","Зимовий чарівний годинник: Втрачені хвилини"],6:["Лілія Гайдай","Чарівний день Святого Миколая"],7:["Лариса Мукомела","Всесвітній день української хустки. Цікавинка «Барвиста берегиня»"],8:["Лариса Мукомела","День зимових загадок «Таємниці Снігової Королеви»"],9:["Лариса Мукомела","День сніговика «Снігова математика»"],10:["Ірина Семенова","Снігові слова: Зимові родичі"],11:["Леся Ільніцька","Майстерня зимової казки"]};
 async function aAdvent(box){
+  box.innerHTML='<div class="load"><div class="spin"></div></div>';
+  let SHOW=true;
+  try{ const r=await api("adminAdvent"); if(r.ok){ DATA.advent=r.items||[]; SHOW=r.show!==false; DATA.advShow=SHOW; } else { box.innerHTML='<div class="empty">Календар не завантажився. Оновіть скрипт таблиці (Code.gs) і зробіть «Нова версія» в розгортанні.</div>'; return; } }catch(err){ if(err.message==="auth") return; }
   const D=advDays();
   box.innerHTML=`<div class="form">
     <div class="note">Заповнюйте дні, коли учасниці їх беруть. «Зайнято» — день узято, віконце готується. «Готове» — віконце здано. Посилання можна додати пізніше.</div>
@@ -1650,13 +1657,17 @@ async function aAdvent(box){
       <div class="adv-rn"><b>${x.day}</b><small>${advWd(x.day).slice(0,2).toLowerCase()}</small></div>
       <div class="adv-rf"><input class="fi a-au" placeholder="Авторка" maxlength="80"><input class="fi a-ti" placeholder="Назва віконця" maxlength="160"><input class="fi a-li" placeholder="Посилання (необов'язково)" maxlength="500">
       <select class="sel a-st"><option value="free">Вільний</option><option value="taken">Зайнято</option><option value="ready">Готове ✓</option></select></div></div>`).join("")}</div>
-    <div><button class="btn" type="button" id="advSave">Зберегти календар</button></div></div>`;
+    <label class="chk"><input type="checkbox" id="advShow" ${SHOW?"checked":""}> Показувати календар учасницям</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="advSave">Зберегти календар</button><button class="btn ghost" type="button" id="advSeed">Перенести 11 днів з мого календарика</button></div></div>`;
   box.querySelectorAll(".adv-row").forEach(r=>{ const x=D[+r.dataset.day-1]; r.querySelector(".a-au").value=x.author; r.querySelector(".a-ti").value=x.title; r.querySelector(".a-li").value=x.link; r.querySelector(".a-st").value=x.state;
     r.querySelector(".a-au").addEventListener("input",e=>{ const s=r.querySelector(".a-st"); if(e.target.value.trim() && s.value==="free") s.value="taken"; }); });
+  $("#advSeed").onclick=()=>{ let n=0; box.querySelectorAll(".adv-row").forEach(r=>{ const s=ADV_SEED[+r.dataset.day]; if(s && !r.querySelector(".a-au").value.trim()){ r.querySelector(".a-au").value=s[0]; r.querySelector(".a-ti").value=s[1]; r.querySelector(".a-st").value="ready"; n++; } });
+    toast(n?`Перенесено днів: ${n}. Тепер натисніть «Зберегти календар»`:"Ці дні вже заповнені"); };
   $("#advSave").onclick=()=>{
     const days=[...box.querySelectorAll(".adv-row")].map(r=>{ let link=r.querySelector(".a-li").value.trim(); if(link && !/^https?:\/\//i.test(link)) link="https://"+link;
       return {day:+r.dataset.day,author:r.querySelector(".a-au").value.trim(),title:r.querySelector(".a-ti").value.trim(),link,state:r.querySelector(".a-st").value}; });
-    adminSend($("#advSave"),"adminSetAdvent",{days},"Календар збережено",()=>{ DATA.advent=days; });
+    const show=$("#advShow").checked;
+    adminSend($("#advSave"),"adminSetAdvent",{days,show},show?"Календар збережено":"Календар збережено й сховано від учасниць",()=>{ DATA.advent=days; DATA.advShow=show; });
   };
 }
 
