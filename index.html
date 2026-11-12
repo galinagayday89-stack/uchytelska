@@ -391,6 +391,53 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .b-no{background:#ECEEF3;color:#5B6480}
 .wshow{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--navy);margin:4px 0 2px;cursor:pointer}
 .wshow input{width:18px;height:18px;accent-color:var(--blue)}
+.adv-ban{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:linear-gradient(110deg,#E6F4F6,#fff 55%,#FFF5DC);border-radius:var(--r);padding:18px 22px;box-shadow:var(--shadow);margin:0 0 22px;cursor:pointer}
+.adv-ban .tx{flex:1;min-width:min(100%,240px)}
+.adv-ban h3{font-size:clamp(22px,2.6vw,30px)}
+.adv-ban p{margin:4px 0 0}
+.adv-ban-n{flex:none;width:74px;height:74px;border-radius:18px;background:linear-gradient(160deg,#138a99,#0b6470);color:#fff;font-family:var(--disp);font-weight:800;font-size:34px;display:grid;place-items:center;box-shadow:0 10px 22px rgba(11,100,112,.3)}
+.adv-sum{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin:0 0 16px;font-size:17px}
+.adv-sum b{font-family:var(--disp);font-size:26px;color:#0f7c8a}
+.adv-free{background:#FFF5DC;border-radius:999px;padding:6px 14px;font-weight:700;color:#8a5a00}
+.adv-wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+.adv-cal{background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:16px}
+.adv-month{font-family:var(--disp);font-weight:800;color:var(--navy);font-size:24px;text-align:center;margin-bottom:10px}
+.adv-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.adv-w{text-align:center;font-weight:800;color:var(--navy);background:#D3E6E8;border-radius:10px;padding:7px 0;font-size:14px}
+.adv-w.we{background:#FBE3B6;color:#8a4b0c}
+.adv-d{position:relative;border:0;border-radius:14px;min-height:74px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font:inherit;background:#F6F1EA;color:var(--navy);transition:transform .12s}
+.adv-d b{font-family:var(--disp);font-size:24px;line-height:1}
+.adv-d small{font-size:11px;font-weight:700;line-height:1.15;text-align:center;color:#41506a;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.adv-d small.fr{color:#9aa3b2;font-weight:600}
+.adv-d.we{background:#FDF0D7}
+.adv-d.taken{background:#E8F1FB}
+.adv-d.ready{background:#D6ECEE}
+.adv-d.ready::after{content:"✓";position:absolute;top:5px;right:7px;font-size:12px;font-weight:800;color:#0f7c8a}
+.adv-d:hover{transform:translateY(-2px)}
+.adv-d.sel{background:linear-gradient(160deg,#138a99,#0b6470);color:#fff}
+.adv-d.sel small,.adv-d.sel.ready::after{color:#E6F7F8}
+.adv-e{min-height:74px}
+.adv-leg{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:13px;color:var(--muted);font-weight:700}
+.adv-leg i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-1px}
+.adv-leg i.ready{background:#D6ECEE;outline:1px solid #0f7c8a}.adv-leg i.taken{background:#E8F1FB}.adv-leg i.free{background:#F6F1EA}
+.adv-side{background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;position:sticky;top:90px}
+.adv-cap{font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#0f7c8a}
+.adv-date{font-family:var(--disp);font-weight:800;font-size:32px;color:var(--navy);line-height:1}
+.adv-pill{background:#D3E6E8;border-radius:999px;padding:4px 16px;font-weight:700;color:var(--navy)}
+.adv-st{font-weight:700;font-style:italic;color:var(--muted)}
+.adv-st.ready{color:#0f7c8a}
+.adv-t{font-size:20px;line-height:1.25;margin:4px 0 0}
+.adv-a{margin:0;color:var(--muted)}
+.adv-a b{color:var(--navy)}
+.adv-soon{display:block;width:100%;background:#F0F2F5;color:#7a8597;border-radius:14px;padding:12px;font-weight:700;margin-top:6px}
+.adv-rows{display:grid;gap:10px}
+.adv-row{display:flex;gap:12px;align-items:flex-start;background:var(--soft,#F3F6FB);border-radius:14px;padding:10px}
+.adv-rn{flex:none;width:42px;text-align:center;display:flex;flex-direction:column}
+.adv-rn b{font-family:var(--disp);font-size:24px;color:var(--navy);line-height:1}
+.adv-rn small{color:var(--muted);font-weight:700}
+.adv-rf{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
+@media (max-width:860px){.adv-wrap{grid-template-columns:1fr}.adv-side{position:static}}
+@media (max-width:560px){.adv-grid{gap:4px}.adv-d{min-height:58px;border-radius:10px}.adv-d b{font-size:19px}.adv-d small{font-size:10px;white-space:nowrap}.adv-d .sur{display:none}.adv-e{min-height:58px}.adv-rf{grid-template-columns:1fr}}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -732,8 +779,10 @@ async function demoApi(action, p){
       recipes:[...(st.recipes||[]).map(r=>Object.assign({},r,{hidden:!r.show})), ...DEMO_DATA.recipes],
       lessons:[...DEMO_DATA.lessons, ...(st.lessons||[]).map(l=>Object.assign({},l,{hidden:!l.show}))],
       projects:(st.projects||[]).map(x=>Object.assign({},x,{hidden:!x.show})),
+      advent: st.advent || [{day:1,author:"Ірина Семенова",title:"Перший день зими: Снігова симетрія",state:"ready"},{day:2,author:"Леся Ільніцька",title:"Снігова ковдра для природи",state:"ready"},{day:6,author:"Лілія Гайдай",title:"Чарівний день Святого Миколая",state:"taken"}],
       challenge: st.challenge || DEMO_DATA.challenge, role:"admin"});
     case "adminProjects": return {ok:true, items:(st.projects||[])};
+    case "adminSetAdvent": st.advent=p.days; lsSet("cu_demo",st); return {ok:true};
     case "adminAddProject": { const id="p"+Date.now(); (st.projects=st.projects||[]).unshift(Object.assign({id, show:p.show}, p.project)); lsSet("cu_demo",st); return {ok:true,id}; }
     case "adminUpdateProject": { const x=(st.projects||[]).find(y=>y.id===p.id); if(!x) return {ok:false,message:"Проєкт не знайдено"}; const cv=x.cover; Object.assign(x,p.project,{show:p.show}); if(!p.project.cover) x.cover=cv; lsSet("cu_demo",st); return {ok:true}; }
     case "adminAddRecipe": (st.recipes=st.recipes||[]).unshift(Object.assign({id:"r"+Date.now(), img:p.photo||"", show:p.show}, p.recipe)); lsSet("cu_demo",st); return {ok:true};
@@ -828,7 +877,7 @@ async function ensureData(){
   DATA = lsGet("cu_cache_"+S.code, null);
   try{
     const r = await api("data");
-    if(r.ok){ DATA = {recipes:r.recipes||[], lessons:r.lessons||[], projects:r.projects||[], challenge:r.challenge||null}; lsSet("cu_cache_"+S.code, DATA); if(r.name){S.name=r.name; S.validTo=r.validTo; S.role=r.role||S.role; lsSet("cu_session",S);} }
+    if(r.ok){ DATA = {recipes:r.recipes||[], lessons:r.lessons||[], projects:r.projects||[], advent:r.advent||[], challenge:r.challenge||null}; lsSet("cu_cache_"+S.code, DATA); if(r.name){S.name=r.name; S.validTo=r.validTo; S.role=r.role||S.role; lsSet("cu_session",S);} }
   }catch(e){ if(e.message==="auth") throw e; }
   if(!DATA) DATA={recipes:[],lessons:[],projects:[],challenge:null};
   if(!DATA.projects) DATA.projects=[];
@@ -854,7 +903,7 @@ async function render(){
   window.scrollTo(0,0);
   loading();
   try{ await ensureData(); }catch(e){ return; }
-  const V = {projects:viewProjects,project:viewProject,rating:viewRating,admin:viewAdmin,home:viewHome,start:viewStart,recipes:viewRecipes,recipe:viewRecipe,lessons:viewLessons,lesson:viewLesson,
+  const V = {advent:viewAdvent,projects:viewProjects,project:viewProject,rating:viewRating,admin:viewAdmin,home:viewHome,start:viewStart,recipes:viewRecipes,recipe:viewRecipe,lessons:viewLessons,lesson:viewLesson,
              trainers:viewTrainers,trainer:viewTrainer,questions:viewQuestions,board:viewBoard,journal:viewJournal};
   (V[route]||viewHome)(id);
   topCheck();
@@ -1459,6 +1508,7 @@ const pAuthors = pr => [...new Set((pr.parts||[]).map(x=>String(x.author||"").tr
 function viewProjects(){
   const L=DATA.projects||[];
   app.innerHTML = crumbs(["Головна","home"],["Спільні проєкти"]) + ptitle("Спільні проєкти","Навчальні матеріали, які учасниці спільноти створили разом") + `
+  ${(()=>{ const D=advDays(), t=D.filter(x=>x.state!=="free").length; return `<section class="adv-ban" data-go="advent" role="link" tabindex="0"><div class="adv-ban-n">24</div><div class="tx"><div class="pj-eye">Готуємо разом · грудень</div><h3>Адвент-календар знань</h3><p>${t} з 24 днів уже мають авторок. Подивіться, хто що готує, і візьміть вільний день!</p></div><span class="btn pill gold">Відкрити ›</span></section>`; })()}
   <div class="grid3">${L.length?L.map(pr=>{ const a=pAuthors(pr), n=(pr.parts||[]).length;
     return `<article class="rc" data-go="project-${esc(pr.id)}"><div class="th pj-th">${pr.cover?`<img src="${esc(pr.cover)}" alt="" loading="lazy">`:`<div class="ph">${esc(pr.title)}</div>`}</div>
     <div class="bd">${pr.hidden?HID:""}<h3>${esc(pr.title)}</h3><p>${esc(pr.desc)}</p>
@@ -1555,6 +1605,61 @@ function viewProject(id){
   draw(); preload(1);
 }
 
+/* ---------- АДВЕНТ-КАЛЕНДАР ---------- */
+const ADV_Y=2026, ADV_M=11, ADV_N=24;
+const ADV_ST={free:"Вільний день",taken:"Зайнято, готується",ready:"Віконце готове"};
+const advDays=()=>{ const A=DATA.advent||[], m={}; A.forEach(x=>m[+x.day]=x); return Array.from({length:ADV_N},(_,i)=>Object.assign({day:i+1,author:"",title:"",state:"free",link:""},m[i+1]||{})); };
+const advWd=d=>["Неділя","Понеділок","Вівторок","Середа","Четвер","Пʼятниця","Субота"][new Date(ADV_Y,ADV_M,d).getDay()];
+let ADV_SEL=0;
+function viewAdvent(){
+  const D=advDays(), ready=D.filter(x=>x.state==="ready").length, taken=D.filter(x=>x.state!=="free").length, free=D.filter(x=>x.state==="free").map(x=>x.day);
+  if(!ADV_SEL) ADV_SEL=(D.find(x=>x.state!=="free")||D[0]).day;
+  const lead=(new Date(ADV_Y,ADV_M,1).getDay()+6)%7;
+  const cells=[];
+  for(let i=0;i<lead;i++) cells.push('<div class="adv-e"></div>');
+  D.forEach(x=>{ const we=[0,6].includes(new Date(ADV_Y,ADV_M,x.day).getDay());
+    cells.push(`<button type="button" class="adv-d ${x.state} ${we?"we":""} ${x.day===ADV_SEL?"sel":""}" data-ad="${x.day}" aria-label="${x.day} грудня: ${esc(x.author||ADV_ST.free)}"><b>${x.day}</b>${x.author?`<small>${(([f,l])=>`${esc(f||"")}<span class="sur"> ${esc(l||"")}</span>`)(x.author.split(/\s+/))}</small>`:`<small class="fr">вільно</small>`}</button>`); });
+  app.innerHTML = crumbs(["Спільні проєкти","projects"],["Адвент-календар знань"]) + ptitle("Адвент-календар знань","24 зимові віконця від учасниць спільноти · 1–24 грудня") + `
+  <div class="adv-sum">
+    <div><b>${taken}</b> з ${ADV_N} днів зайнято</div><div><b>${ready}</b> віконець готово</div>
+    ${free.length?`<div class="adv-free">Вільні дні: ${free.join(", ")}</div>`:`<div class="adv-free">Усі дні розібрано 🎉</div>`}
+  </div>
+  <div class="adv-wrap">
+    <div class="adv-cal"><div class="adv-month">Грудень ${ADV_Y}</div>
+      <div class="adv-grid">${["Пн","Вт","Ср","Чт","Пт","Сб","Нд"].map((w,i)=>`<div class="adv-w ${i>4?"we":""}">${w}</div>`).join("")}${cells.join("")}</div>
+      <div class="adv-leg"><span><i class="ready"></i>віконце готове</span><span><i class="taken"></i>зайнято</span><span><i class="free"></i>вільно</span></div>
+    </div>
+    <aside class="adv-side" id="advSide"></aside>
+  </div>
+  <div class="note" style="margin-top:18px">Хочете взяти вільний день? Напишіть номер дня й свій предмет у гілці «Адвент-календар знань» у Telegram.${isAdmin()?' Дні заповнюються в Кабінеті → «Адвент».':""}</div>`;
+  const side=()=>{ const x=D[ADV_SEL-1];
+    $("#advSide").innerHTML=`<div class="adv-cap">Обраний день</div><div class="adv-date">${x.day} грудня</div><span class="adv-pill">${advWd(x.day)}</span>
+      <div class="adv-st ${x.state}">${x.state==="ready"?"✓ ":""}${ADV_ST[x.state]}</div>
+      ${x.title?`<h3 class="adv-t">${esc(x.title)}</h3>`:""}${x.author?`<p class="adv-a">Авторка: <b>${esc(x.author)}</b></p>`:'<p class="adv-a">Цей день ще вільний. Візьміть його!</p>'}
+      ${x.link?`<a class="btn pill gold" href="${esc(x.link)}" target="_blank" rel="noopener">Відкрити завдання ›</a>`:`<span class="adv-soon">Віконце відкриється ${x.day} грудня</span>`}
+      ${isAdmin()?'<button class="btn ghost sm" type="button" id="advEd" style="margin-top:10px">✏️ Заповнити дні</button>':""}`;
+    if($("#advEd")) $("#advEd").onclick=()=>{ ATAB="advent"; go("admin"); }; };
+  side();
+  app.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>{ ADV_SEL=+b.dataset.ad; app.querySelectorAll("[data-ad]").forEach(z=>z.classList.toggle("sel",z===b)); side(); });
+}
+async function aAdvent(box){
+  const D=advDays();
+  box.innerHTML=`<div class="form">
+    <div class="note">Заповнюйте дні, коли учасниці їх беруть. «Зайнято» — день узято, віконце готується. «Готове» — віконце здано. Посилання можна додати пізніше.</div>
+    <div class="adv-rows">${D.map(x=>`<div class="adv-row" data-day="${x.day}">
+      <div class="adv-rn"><b>${x.day}</b><small>${advWd(x.day).slice(0,2).toLowerCase()}</small></div>
+      <div class="adv-rf"><input class="fi a-au" placeholder="Авторка" maxlength="80"><input class="fi a-ti" placeholder="Назва віконця" maxlength="160"><input class="fi a-li" placeholder="Посилання (необов'язково)" maxlength="500">
+      <select class="sel a-st"><option value="free">Вільний</option><option value="taken">Зайнято</option><option value="ready">Готове ✓</option></select></div></div>`).join("")}</div>
+    <div><button class="btn" type="button" id="advSave">Зберегти календар</button></div></div>`;
+  box.querySelectorAll(".adv-row").forEach(r=>{ const x=D[+r.dataset.day-1]; r.querySelector(".a-au").value=x.author; r.querySelector(".a-ti").value=x.title; r.querySelector(".a-li").value=x.link; r.querySelector(".a-st").value=x.state;
+    r.querySelector(".a-au").addEventListener("input",e=>{ const s=r.querySelector(".a-st"); if(e.target.value.trim() && s.value==="free") s.value="taken"; }); });
+  $("#advSave").onclick=()=>{
+    const days=[...box.querySelectorAll(".adv-row")].map(r=>{ let link=r.querySelector(".a-li").value.trim(); if(link && !/^https?:\/\//i.test(link)) link="https://"+link;
+      return {day:+r.dataset.day,author:r.querySelector(".a-au").value.trim(),title:r.querySelector(".a-ti").value.trim(),link,state:r.querySelector(".a-st").value}; });
+    adminSend($("#advSave"),"adminSetAdvent",{days},"Календар збережено",()=>{ DATA.advent=days; });
+  };
+}
+
 /* ---------- КАБІНЕТ АВТОРКИ ---------- */
 const isAdmin = () => !!(S && S.role==="admin");
 let ATAB = "overview";
@@ -1571,7 +1676,7 @@ async function adminSend(btn, action, payload, okMsg, after){
 }
 function viewAdmin(){
   if(!isAdmin()){ viewHome(); return; }
-  const T=[["overview","Огляд"],["recipe","Рецепти"],["lesson","Уроки"],["challenge","Челендж"],["project","Проєкти"],["questions","Запитання"],["works","Роботи"],["import","Імпорт"]];
+  const T=[["overview","Огляд"],["recipe","Рецепти"],["lesson","Уроки"],["challenge","Челендж"],["project","Проєкти"],["advent","Адвент"],["questions","Запитання"],["works","Роботи"],["import","Імпорт"]];
   app.innerHTML = crumbs(["Головна","home"],["Кабінет авторки"]) + ptitle("Кабінет авторки","Додавайте матеріали й відповідайте учасницям просто з телефона") + `
   <div class="tabs">${T.map(t=>`<button data-a="${t[0]}">${t[1]}</button>`).join("")}</div>
   <div id="abody"></div>`;
@@ -1581,7 +1686,7 @@ function viewAdmin(){
 function drawA(){
   app.querySelectorAll("[data-a]").forEach(b=>b.classList.toggle("on", b.dataset.a===ATAB));
   const box=$("#abody");
-  ({project:aProject,overview:aOverview,recipe:aRecipe,lesson:aLesson,challenge:aChallenge,questions:aQuestions,works:aWorks,import:aImport})[ATAB](box);
+  ({advent:aAdvent,project:aProject,overview:aOverview,recipe:aRecipe,lesson:aLesson,challenge:aChallenge,questions:aQuestions,works:aWorks,import:aImport})[ATAB](box);
 }
 let EDIT_RECIPE = "";
 async function aRecipe(box){
