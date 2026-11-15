@@ -444,6 +444,7 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .wcomm{background:#FFF8E3;border-left:4px solid var(--yellow);border-radius:12px;padding:10px 12px;margin:4px 0}
 .wcomm b{color:var(--navy);font-size:14px}
 .wcomm p{margin:4px 0 0;white-space:pre-line}
+.fi.err{border-color:#E0453A;box-shadow:0 0 0 3px rgba(224,69,58,.15)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -1364,7 +1365,7 @@ function workForm(forCh, forLesson){
         <div class="note" style="margin-top:6px;font-size:14px">Додайте посилання, щоб колеги могли відкрити й спробувати вашу роботу, а не лише побачити скриншот. Перевірте, що доступ відкритий для всіх, хто має посилання.</div></div>
       <div><label class="lbl">Фото або скриншот роботи</label><div class="drop" id="wdrop">Натисніть, щоб обрати зображення</div><input type="file" id="wfile" accept="image/*" class="hidden"></div>
       <div><label class="lbl">Що це за робота?</label><div class="wkind">
-        ${ch?`<label id="wkch"><input type="radio" name="wk" value="ch" ${forCh?"checked":""}><span><b>Челендж тижня</b> · +15 балів<br><small>${esc(ch.desc)}</small><small class="wk-note">На один челендж можна надіслати одну роботу.</small></span></label>`:""}
+        ${ch?`<label id="wkch"><input type="radio" name="wk" value="ch" ${forCh?"checked":""}><span><b>Челендж тижня</b> · +15 балів<br><small>${esc(ch.desc)}</small><small class="wk-note">На один челендж можна надіслати одну роботу.${ch.needLink?" <b>Обовʼязково додайте посилання на роботу.</b>":""}</small></span></label>`:""}
         ${LS.length?`<label><input type="radio" name="wk" value="lesson" ${forLesson?"checked":""}><span><b>Практичне завдання до уроку</b> · +10 балів</span></label>
           <small class="wk-note" style="margin:-4px 0 0 30px">До одного уроку можна надіслати одне практичне завдання.</small>
           <select class="sel ${forLesson?"":"hidden"}" id="wl"><option value="">Оберіть урок…</option>${LS.map(l=>`<option ${forLesson===l.title?"selected":""}>${esc(l.title)}</option>`).join("")}</select>`:""}
@@ -1392,6 +1393,7 @@ function workForm(forCh, forLesson){
     let link=$("#wlink").value.trim(); if(link && !/^https?:\/\//i.test(link)) link="https://"+link;
     if(link && !/^https?:\/\/[^\s.]+\.[^\s]+$/i.test(link)){ toast("Перевірте посилання: схоже, воно неповне"); return; }
     if(kind==="lesson" && !lesson){ toast("Оберіть урок, до якого це завдання"); return; }
+    if(challenge && ch && ch.needLink && !link){ toast("Для челенджу додайте посилання на роботу, щоб колеги й авторка могли її відкрити"); const f=$("#wlink"); f.focus(); f.classList.add("err"); return; }
     if(!title){ toast("Вкажіть назву роботи"); return; }
     if(!photo){ toast("Додайте фото роботи"); return; }
     const b=$("#wsend"); b.disabled=true; b.textContent="Надсилаю…";
@@ -1929,17 +1931,18 @@ async function aLesson(box){
 }
 function aChallenge(box){
   const ch=DATA.challenge;
-  box.innerHTML = `${ch?`<div class="note" style="margin-bottom:18px;max-width:760px">Зараз триває: <b>${esc(ch.desc)}</b>${ch.until?` · до ${esc(fmtDate(ch.until))}`:""}</div>`:""}
+  box.innerHTML = `${ch?`<div class="note" style="margin-bottom:18px;max-width:760px">Зараз триває: <b>${esc(ch.desc)}</b>${ch.until?` · до ${esc(fmtDate(ch.until))}`:""}${ch.needLink?" · посилання обовʼязкове":""}</div>`:""}
   <div class="form">
     ${fld("ac_title","Заголовок",'<input class="fi" id="ac_title" maxlength="60" value="Челендж тижня">')}
     ${fld("ac_desc","Завдання челенджу *",'<input class="fi" id="ac_desc" maxlength="140" placeholder="Наприклад: розмальовка до вашої наступної теми">')}
     ${fld("ac_until","До якої дати",'<input class="fi" id="ac_until" type="date">')}
+    <label class="chk"><input type="checkbox" id="ac_link" checked> Учасниці обовʼязково додають посилання на роботу (презентацію, гру тощо)</label>
     <div class="note">Новий челендж замінить поточний на головній і на Дошці досягнень.</div>
     <div><button class="btn" type="button" id="ac_send">Запустити челендж</button></div>
   </div>`;
   const d=new Date(); d.setDate(d.getDate()+7); $("#ac_until").value=d.toISOString().slice(0,10);
   $("#ac_send").onclick = () => {
-    const v=id=>$("#"+id).value.trim(); const challenge={title:v("ac_title")||"Челендж тижня",desc:v("ac_desc"),until:v("ac_until")};
+    const v=id=>$("#"+id).value.trim(); const challenge={title:v("ac_title")||"Челендж тижня",desc:v("ac_desc"),until:v("ac_until"),needLink:$("#ac_link").checked};
     if(!challenge.desc){ toast("Опишіть завдання челенджу"); return; }
     adminSend($("#ac_send"),"adminSetChallenge",{challenge},"Челендж запущено!",()=>aChallenge(box));
   };
