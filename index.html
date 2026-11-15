@@ -445,6 +445,9 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .wcomm b{color:var(--navy);font-size:14px}
 .wcomm p{margin:4px 0 0;white-space:pre-line}
 .fi.err{border-color:#E0453A;box-shadow:0 0 0 3px rgba(224,69,58,.15)}
+.pulse{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(245,184,0,.35)}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -1337,8 +1340,10 @@ async function drawG(){
       b.disabled=true; try{ const r=await api("myDeleteWork",{id:b.dataset.md}); if(r.ok){ toast("Роботу видалено"); drawG(); } else { toast(r.message||"Не вдалося видалити. Оновіть сторінку"); b.disabled=false; } }catch(e){ b.disabled=false; }
     });
     box.querySelectorAll("[data-win]").forEach(b=>b.onclick=async()=>{
-      if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Так, переможниця (+20 балів)"; return; }
-      b.disabled=true; try{ const r=await api("adminWinner",{id:b.dataset.win}); if(r.ok){ toast("Переможницю обрано! +20 балів"); drawG(); } else { toast(r.message||"Не вдалося"); b.disabled=false; } }catch(e){ b.disabled=false; }
+      if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Натисніть ще раз, щоб підтвердити (+20 балів)"; b.classList.add("pulse"); toast("Натисніть кнопку ще раз, щоб підтвердити вибір"); return; }
+      b.disabled=true; b.textContent="Зберігаю…";
+      try{ const r=await api("adminWinner",{id:b.dataset.win}); if(r.ok){ toast("Переможницю обрано! +20 балів"); drawG(); } else { toast(r.message||"Не вдалося зберегти. Спробуйте ще раз"); b.disabled=false; b.textContent="🏆 Обрати переможницею"; delete b.dataset.sure; } }
+      catch(e){ if(e.message!=="auth") toast("Не вдалося зв'язатися з таблицею. Перевірте інтернет і спробуйте ще раз"); b.disabled=false; b.textContent="🏆 Обрати переможницею"; delete b.dataset.sure; }
     });
     box.querySelectorAll("[data-l]").forEach(b=>b.onclick=async()=>{
       const id=b.dataset.l, p=P(), on=p.likes.includes(id), n=b.querySelector("span");
