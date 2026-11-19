@@ -448,6 +448,8 @@ label.lbl{display:block;font-weight:800;font-size:18px;margin-bottom:10px;color:
 .pulse{animation:pulse 1s ease-in-out infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 6px rgba(245,184,0,.35)}}
 @media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+.adv-kids{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:space-between;background:linear-gradient(110deg,#0B1E47,#1d3f86);color:#fff;border-radius:18px;padding:16px 20px;margin-top:18px}
+.adv-kids span{display:block;color:#D7E3FF;font-size:15px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chk{display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--blue);flex:none}
@@ -1564,6 +1566,9 @@ function viewProjects(){
     <div class="bd">${pr.hidden?HID:""}<h3>${esc(pr.title)}</h3><p>${esc(pr.desc)}</p>
     <div class="mini"><span>${n} ${plural(n,"частина","частини","частин")}</span><span>${a.length} ${plural(a.length,"авторка","авторки","авторок")}</span></div></div></article>`;}).join(""):`<div class="empty">Перший спільний проєкт скоро з'явиться.</div>`}</div>`;
 }
+const ADVENT_PUBLIC = () => location.origin + location.pathname.replace(/[^/]*$/,"") + "advent.html";
+const isAdventProj = pr => /адвент/i.test(pr.title||"");
+const adventProj = () => (DATA.projects||[]).find(isAdventProj);
 let PJ = {id:"", page:0, img:0, open:{}};
 function shareProject(pr){
   const url = location.origin + location.pathname + "#project-" + pr.id;
@@ -1577,9 +1582,11 @@ function shareProject(pr){
       <a class="btn" href="${esc(tg)}" target="_blank" rel="noopener">✈️ Надіслати в Telegram</a>
       <button class="btn ghost" type="button" id="shCopy">${I.copy}Копіювати посилання</button>
       <button class="btn ghost" type="button" id="shText">Копіювати текст допису</button>
+      ${isAdventProj(pr)?`<div class="note" style="margin:4px 0 0">Для учнів є відкрита сторінка без коду, де віконця відкриваються по днях:</div><div class="sh-link" style="margin:0">${esc(ADVENT_PUBLIC())}</div><button class="btn gold" type="button" id="shKids">Копіювати посилання для учнів</button>`:""}
       ${navigator.share?'<button class="btn ghost" type="button" id="shMore">Інші способи…</button>':""}
     </div>
     <button class="btn ghost sm" type="button" data-close style="margin-top:14px">Закрити</button>`);
+  const kb=m.querySelector("#shKids"); if(kb) kb.onclick=async()=>{ const ok=await copyText(ADVENT_PUBLIC()); toast(ok?"Посилання для учнів скопійовано":"Виділіть посилання вручну"); };
   m.querySelector("#shCopy").onclick=async()=>{ const ok=await copyText(url); toast(ok?"Посилання скопійовано":"Виділіть посилання вручну"); };
   m.querySelector("#shText").onclick=async()=>{ const ok=await copyText(text+"\n"+url); toast(ok?"Текст із посиланням скопійовано":"Не вдалося скопіювати"); };
   const more=m.querySelector("#shMore"); if(more) more.onclick=()=>navigator.share({title:pr.title,text,url}).catch(()=>{});
@@ -1591,8 +1598,8 @@ function viewProject(id){
   if(PJ.id!==pr.id) PJ={id:pr.id, page:0, img:0, open:{}};
   const parts=pr.parts||[], N=parts.length, A={};
   parts.forEach((x,i)=>{ const a=String(x.author||"").trim(); if(a) (A[a]=A[a]||[]).push(i+1); });
-  const word=/ключ/i.test(pr.title)?"Ключ":"Частина";
-  const authList=`<ul class="pj-auth">${Object.keys(A).map(a=>`<li><b>${esc(a)}</b><span>${A[a].length>1?word==="Ключ"?"ключі":"частини":word==="Ключ"?"ключ":"частина"} ${A[a].join(", ")}</span></li>`).join("")}</ul>`;
+  const word=/ключ/i.test(pr.title)?"Ключ":/адвент|календар/i.test(pr.title)?"День":"Частина";
+  const authList=`<ul class="pj-auth">${Object.keys(A).map(a=>`<li><b>${esc(a)}</b><span>${({Ключ:["ключ","ключі"],День:["день","дні"],Частина:["частина","частини"]})[word][A[a].length>1?1:0]} ${A[a].join(", ")}</span></li>`).join("")}</ul>`;
   app.innerHTML = crumbs(["Спільні проєкти","projects"],[pr.title]) + (pr.hidden?'<div class="note" style="margin:6px 0 14px">Проєкт схований: так його побачать учасниці, коли ви ввімкнете «Показувати учасницям».</div>':"") + `
   <div class="pq">
     <div class="pq-top"><div class="pq-keys" id="pqKeys"></div><div class="pq-acts"><button class="btn gold sm" id="shp" type="button">📤 Поділитися</button>${isAdmin()?'<button class="btn ghost sm" id="edp" type="button">✏️ Редагувати</button>':""}</div></div>
@@ -1624,7 +1631,7 @@ function viewProject(id){
       $("#pqStart").onclick=()=>turn(1);
     } else if(p>N){
       const ans=parts.map((x,i)=>x.answer||x.password?`<tr><td>${i+1}</td><td class="wrap"><b>${esc(x.title)}</b><br>${esc(x.answer||"")}</td><td><b>${esc(x.password||"")}</b></td></tr>`:"").join("");
-      st.innerHTML=`<section class="pq-final"><div class="pj-eye">${N} ${plural(N,word.toLowerCase(),word==="Ключ"?"ключі":"частини",word==="Ключ"?"ключів":"частин")} пройдено</div><h2>Скриню відкрито!</h2>
+      st.innerHTML=`<section class="pq-final"><div class="pj-eye">${N} ${({Ключ:["ключ","ключі","ключів"],День:["день","дні","днів"],Частина:["частина","частини","частин"]})[word].reduce((a,x,k,arr)=>plural(N,arr[0],arr[1],arr[2]))} пройдено</div><h2>Скриню відкрито!</h2>
         <p>Дякуємо авторкам, які разом створили цей проєкт:</p>${authList}
         <button class="btn ghost" type="button" id="pqAgain">↺ Почати спочатку</button></section>
         ${ans?`<details class="pj-ans"><summary>Відповіді для вчителя</summary><div class="mtable"><table><thead><tr><th>№</th><th>Відповіді</th><th>Пароль</th></tr></thead><tbody>${ans}</tbody></table></div></details>`:""}`;
@@ -1682,18 +1689,20 @@ function viewAdvent(){
     </div>
     <aside class="adv-side" id="advSide"></aside>
   </div>
+  ${adventProj()?`<div class="adv-kids"><div><b>Сторінка календаря для учнів</b><span>Відкривається без коду, віконця з'являються по днях. Покажіть на дошці або надішліть дітям.</span></div><a class="btn pill gold" href="${esc(ADVENT_PUBLIC())}" target="_blank" rel="noopener">Відкрити ›</a></div>`:""}
   <div class="note" style="margin-top:18px">Хочете взяти вільний день? Напишіть номер дня й свій предмет у гілці «Адвент-календар знань» у Telegram.${isAdmin()?' Дні заповнюються в Кабінеті → «Адвент».':""}</div>`;
   const side=()=>{ const x=D[ADV_SEL-1];
     $("#advSide").innerHTML=`<div class="adv-cap">Обраний день</div><div class="adv-date">${x.day} грудня</div><span class="adv-pill">${advWd(x.day)}</span>
       <div class="adv-st ${x.state}">${x.state==="ready"?"✓ ":""}${ADV_ST[x.state]}</div>
       ${x.title?`<h3 class="adv-t">${esc(x.title)}</h3>`:""}${x.author?`<p class="adv-a">Авторка: <b>${esc(x.author)}</b></p>`:'<p class="adv-a">Цей день ще вільний. Візьміть його!</p>'}
-      ${x.link?`<a class="btn pill gold" href="${esc(x.link)}" target="_blank" rel="noopener">Відкрити завдання ›</a>`:`<span class="adv-soon">Віконце відкриється ${x.day} грудня</span>`}
+      ${adventProj()&&(adventProj().parts||[]).length>=x.day?'<button class="btn pill gold" type="button" id="advOpen">Відкрити віконце ›</button>':x.link?`<a class="btn pill gold" href="${esc(x.link)}" target="_blank" rel="noopener">Відкрити завдання ›</a>`:`<span class="adv-soon">Віконце відкриється ${x.day} грудня</span>`}
       ${isAdmin()?'<button class="btn ghost sm" type="button" id="advEd" style="margin-top:10px">✏️ Заповнити дні</button>':""}`;
-    if($("#advEd")) $("#advEd").onclick=()=>{ ATAB="advent"; go("admin"); }; };
+    if($("#advEd")) $("#advEd").onclick=()=>{ ATAB="advent"; go("admin"); };
+    if($("#advOpen")) $("#advOpen").onclick=()=>{ const pr=adventProj(); PJ={id:pr.id,page:x.day,img:0,open:{}}; go("project-"+pr.id); }; };
   side();
   app.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>{ ADV_SEL=+b.dataset.ad; app.querySelectorAll("[data-ad]").forEach(z=>z.classList.toggle("sel",z===b)); side(); });
 }
-const ADV_SEED={1:["Ірина Семенова","Перший день зими: Снігова симетрія"],2:["Леся Ільніцька","Снігова ковдра для природи"],3:["Ірина Семенова","Секрет ажурної сніжинки: Паперова магія"],4:["Ірина Семенова","Зимова пошта: Загадка загубленого листа"],5:["Ірина Семенова","Зимовий чарівний годинник: Втрачені хвилини"],6:["Лілія Гайдай","Чарівний день Святого Миколая"],7:["Лариса Мукомела","Всесвітній день української хустки. Цікавинка «Барвиста берегиня»"],8:["Лариса Мукомела","День зимових загадок «Таємниці Снігової Королеви»"],9:["Лариса Мукомела","День сніговика «Снігова математика»"],10:["Ірина Семенова","Снігові слова: Зимові родичі"],11:["Леся Ільніцька","Майстерня зимової казки"]};
+const ADV_SEED={"1": ["Ірина Семенова", "Перший день зими: Снігова симетрія"], "2": ["Леся Ільніцька", "Снігова ковдра для природи"], "3": ["Ірина Семенова", "Секрет ажурної сніжинки: Паперова магія"], "4": ["Ірина Семенова", "Зимова пошта: Загадка загубленого листа"], "5": ["Ірина Семенова", "Зимовий чарівний годинник: Втрачені хвилини"], "6": ["Лілія Гайдай", "Чарівний день Святого Миколая"], "7": ["Лариса Мукомела", "Всесвітній день української хустки"], "8": ["Лариса Мукомела", "День зимових загадок «Таємниці Снігової Королеви»"], "9": ["Лариса Мукомела", "День сніговика «Снігова математика»"], "10": ["Ірина Семенова", "Снігові слова: Зимові родичі"], "11": ["Леся Ільніцька", "Майстерня зимової казки"], "12": ["Галина Руденко", "Таємниці літосфери: Куди зникають сніжинки під землею?"], "13": ["Галина Руденко", "Кліматичний марафон: Подорож поясами Землі"], "14": ["Галина Гайдай", "Тепло маленького вчинку"], "15": ["Ірина Семенова", "Секрет зимового ранку"], "16": ["Ірина Семенова", "Мелодія крижаного вітру"], "17": ["Ірина Семенова", "Зимовий вітраж на вікні"], "18": ["Лариса Мукомела", "День подарунків від серця «Майстерня добрих див»"], "19": ["Лариса Мукомела", "День таємниць зимового лісу «Слідами лісових мешканців»"], "20": ["Галина Руденко", "Степова симфонія України: Скарби під відкритим небом"], "21": ["Лариса Мукомела", "День найдовшої ночі «Таємниця зимового сонцестояння»"], "22": ["Лариса Мукомела", "День енергетика «Таємниця чарівної лампочки»"], "23": ["Лариса Мукомела", "День різдвяної зірки «Сяйво українських традицій»"], "24": ["Лариса Мукомела", "Святвечір «Таємниця різдвяної вечері»"]};
 async function aAdvent(box){
   box.innerHTML='<div class="load"><div class="spin"></div></div>';
   let SHOW=true;
@@ -1706,7 +1715,7 @@ async function aAdvent(box){
       <div class="adv-rf"><input class="fi a-au" placeholder="Авторка" maxlength="80"><input class="fi a-ti" placeholder="Назва віконця" maxlength="160"><input class="fi a-li" placeholder="Посилання (необов'язково)" maxlength="500">
       <select class="sel a-st"><option value="free">Вільний</option><option value="taken">Зайнято</option><option value="ready">Готове ✓</option></select></div></div>`).join("")}</div>
     <label class="chk"><input type="checkbox" id="advShow" ${SHOW?"checked":""}> Показувати календар учасницям</label>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="advSave">Зберегти календар</button><button class="btn ghost" type="button" id="advSeed">Перенести 11 днів з мого календарика</button></div></div>`;
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="advSave">Зберегти календар</button><button class="btn ghost" type="button" id="advSeed">Заповнити всі 24 дні з Telegram</button></div></div>`;
   box.querySelectorAll(".adv-row").forEach(r=>{ const x=D[+r.dataset.day-1]; r.querySelector(".a-au").value=x.author; r.querySelector(".a-ti").value=x.title; r.querySelector(".a-li").value=x.link; r.querySelector(".a-st").value=x.state;
     r.querySelector(".a-au").addEventListener("input",e=>{ const s=r.querySelector(".a-st"); if(e.target.value.trim() && s.value==="free") s.value="taken"; }); });
   $("#advSeed").onclick=()=>{ let n=0; box.querySelectorAll(".adv-row").forEach(r=>{ const s=ADV_SEED[+r.dataset.day]; if(s && !r.querySelector(".a-au").value.trim()){ r.querySelector(".a-au").value=s[0]; r.querySelector(".a-ti").value=s[1]; r.querySelector(".a-st").value="ready"; n++; } });
